@@ -1,0 +1,94 @@
+Learning to Program by Writing a Virtual Machine:
+
+Lesson 1: Setting up the project and moving a value into a register
+	Create a C# project
+	Create a CPU class
+	Add a CPU.Tick() function
+	Add a CPU to Program and call CPU.Tick() from Program.Main()
+	Create Core class
+	Create Core.Tick()
+	Add Core[1] Cores to CPU
+	Edit CPU.Tick()
+		Core[0].Tick()
+	Create an IIODevice interface
+		int Read(source)
+		Write(value, destination)
+	Create a Bus class which implements IIODevice
+		Needs internal routing code
+	Add a Bus Northbridge to the CPU
+	Add a Bus Southbdidge to the Northbridge
+	Create a Bios class which implements IDevice
+	Add a Bios object to the Southbridge
+	Add an instruction pointer to the Core and initialise to the address of the Bios
+	Create an Operation enum
+		None = -1
+		Move
+	Create an Instruction struct
+		Operation operation
+		Int data 1
+		Int data 2
+	Add an array of instructions to the Bios class
+	Add an array of registers to the CPU class
+	Add an instruction to the Bios
+		Move r0 Ox48 // "H"
+	Create Operation Core.operation
+	Create int[3] Core.InstructionData
+	Add int[Operation.Count - 1] CPU.CyclesPerInstuction
+	Create Core.GetInstruction()
+		Set Core.Operation based on instruction pointer
+		Read 2 ints from the instruction pointer into Core.Instruction
+		set Core.Instrucion[3] = CPU.CyclesPerInstruction[Core.Operation];
+	Create Core.DoInstruction()
+	Edit Core.Tick()
+		If(Core.Instruction[0] == Operation.None)
+			Core.GetInstruction()
+		Else
+			if(Core.Instruction[3] > 0)
+				Core.Instruction[3]--
+			Else
+				Core.DoInstruction
+				Core.InstructionPointer += 12
+	Edit Core.DoInstruction to do the instruction
+	
+Lesson 2: Adding a display and writing characters to it
+	Create a Display class which derives from IDevice
+		Maps the first byte of data to a command flag
+			Only command is NewLine
+		Maps the next n bytes to chars which are displayed via the console
+	Add a display to CPU.Northbridge
+	Add instructions to the bios
+		Move 0xWhereverTheDisplayStarts r1 // Store the display memory location in a register
+		Move r1 r2
+	Add new operation
+		Add
+	Add instructions to the bios
+		Add r2 1
+		Move r0 r2
+	Run
+	Add instructions to the bios
+		Repeat the instructions copying from bios to screen for: 0x65 0x6c 0x6c 0x6f
+	Run
+	
+Lesson 3 Jump and compare
+	Add Core.CompareFlags
+	Add new operations
+		Jump
+		Compare
+		JumpNotEqual
+	Re-write bios
+		Move 0 r0 // r0 = counter
+		Move display r1 // r1 = address of display char
+		Add r1 1 // move display char past display flag address
+		Move dataLoc r2 // r2 = data pointer
+		Move [r2] r3 // move data from bios to register
+		Move r3 [r1] // move data from register to display char
+		Add r0 1 // increment counter
+		Add r1 1 // increment display char
+		Add r2 1 // increment data pointer
+		Compare r0 stringLength // do loop condition
+		JumpNotEqual 12*5 // loop
+		data
+		
+Lesson 4 Interrupts and the Keyboard
+	Create a keyboard class that implements IIODevice
+	
