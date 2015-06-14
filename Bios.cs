@@ -14,7 +14,13 @@ namespace Virutal_Machine
         public Bios(uint startAddress)
         {
             m_startAddress = startAddress;
-            m_biosData = new int[] { (int)Operations.MoveToRegister, 0,  0x48 };
+            m_biosData = new int[] {    (int)Operations.MoveToRegister,                         0, (int)Program.displayStartAddress,    // Put display address into a register
+                                        (int)Operations.AddLiteral,                                    0, 1,                            // Move past control byte of display
+                                        (int)Operations.MoveToRegister,                         1, 0x68656c6c,                          // Add the four characters "hell" to register
+                                        (int)Operations.MoveFromRegisterToRegisterLocation,     1, 0,                                   // Move characters from register to display (address stored in another register)
+                                        (int)Operations.AddLiteral,                             0, 4,                                   // Move display address past four characters just added
+                                        (int)Operations.MoveToRegister,                         1, 0x6f000000,                          // Add the character "o" to a register
+                                        (int)Operations.MoveFromRegisterToRegisterLocation,     1, 0};                                  // Move character to display
         }
 
         public int Read(uint address)

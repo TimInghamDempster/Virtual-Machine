@@ -9,7 +9,9 @@ namespace Virutal_Machine
     enum Operations
     {
         None,
+        AddLiteral,
         MoveToRegister,
+        MoveFromRegisterToRegisterLocation,
         DummyForCount
     }
 
@@ -17,6 +19,7 @@ namespace Virutal_Machine
     {
         CPUCore[] m_cores;
         public Bus m_northbridge;
+        public Clock m_clock;
 
         public static uint[] CycleCountsPerInstruction;
         public static uint InstructionSize = 12;
@@ -26,6 +29,7 @@ namespace Virutal_Machine
             m_cores = new CPUCore[1];
             m_cores[0] = new CPUCore(this);
             m_northbridge = northbridge;
+            m_clock = new Clock();
 
             SetupCycleCounts();
         }
@@ -33,12 +37,15 @@ namespace Virutal_Machine
         void SetupCycleCounts()
         {
             CycleCountsPerInstruction = new uint[(int)Operations.DummyForCount];
-            CycleCountsPerInstruction[(int)Operations.MoveToRegister] = 5;
+            CycleCountsPerInstruction[(int)Operations.MoveToRegister] = 3;
+            CycleCountsPerInstruction[(int)Operations.MoveFromRegisterToRegisterLocation] = 3;
+            CycleCountsPerInstruction[(int)Operations.AddLiteral] = 4;
         }
 
         public void Tick()
         {
             m_cores[0].Tick();
+            m_clock.Tick();
         }
     }
 }

@@ -1,3 +1,5 @@
 Machine Language Reference
 
-MoveToRegister RegisterNumber dataLocation Cost=5
+MoveToRegister RegisterNumber dataLocation Cost=3
+MoveFromRegisterToRegisterLocation SourceRegisterNumber DestinationLocationRegisterNumber Cost=3
+AddLiteral	RegisterNumber ValueToAdd Cost=4

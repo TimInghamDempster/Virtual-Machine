@@ -38,6 +38,14 @@ namespace Virutal_Machine
                     {
                         m_registers[m_currentOperationData[0]] = m_currentOperationData[1];
                     }break;
+                case Operations.MoveFromRegisterToRegisterLocation:
+                    {
+                        m_cpu.m_northbridge.Write(m_registers[m_currentOperationData[0]], (uint)m_registers[m_currentOperationData[1]]);
+                    } break;
+                case Operations.AddLiteral:
+                    {
+                        m_registers[m_currentOperationData[0]] += m_currentOperationData[1];
+                    }break;
             }
         }
 

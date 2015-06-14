@@ -43,8 +43,10 @@
   <ItemGroup>
     <Compile Include="Bios.cs" />
     <Compile Include="Bus.cs" />
+    <Compile Include="Clock.cs" />
     <Compile Include="CPU.cs" />
     <Compile Include="CPUCore.cs" />
+    <Compile Include="Display.cs" />
     <Compile Include="IIODevice.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
