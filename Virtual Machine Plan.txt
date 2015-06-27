@@ -69,26 +69,24 @@ Lesson 2: Adding a display and writing characters to it
 		Repeat the instructions copying from bios to screen for: 0x65 0x6c 0x6c 0x6f
 	Run
 	
-Lesson 3 Jump and compare
-	Add Core.CompareFlags
-	Add new operations
-		Jump
-		Compare
-		JumpNotEqual
-	Re-write bios
-		Move 0 r0 // r0 = counter
-		Move display r1 // r1 = address of display char
-		Add r1 1 // move display char past display flag address
-		Move dataLoc r2 // r2 = data pointer
-		Move [r2] r3 // move data from bios to register
-		Move r3 [r1] // move data from register to display char
-		Add r0 1 // increment counter
-		Add r1 1 // increment display char
-		Add r2 1 // increment data pointer
-		Compare r0 stringLength // do loop condition
-		JumpNotEqual 12*5 // loop
-		data
-		
-Lesson 4 Interrupts and the Keyboard
-	Create a keyboard class that implements IIODevice
+Lesson 3 Loops, conditionals, interrupts, and the Keyboard
+	Add a jmp operator
+	Modify bios program to overwrite display character in a loop
+	Add a list of interrupt pointers to the Core
+	Create a keyboard class which implements IIODevice
+	Add a keyboard to the southbridge
+	Create instruction: MoveToRegisterFromRegisterLocation
+	Have the bios set up a an interrupt pointer for the keyboard
+	Create an interupt handler that stuffs the key that has been presed into the register the bios program is reading into the display
+	Modify the bios program to incrememnt the current character writing to the display
+	Create a Compare operator
+	Create a JumpEqual operator
+	Modify the bios program
+		Conditional jump out of main loop when reaching end of display line
+			Send newline to display
+			Move line position on display back to start of line
+			Jump back to loop
+
+Lesson 4 Memory and Storage
+
 	

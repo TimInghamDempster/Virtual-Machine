@@ -11,7 +11,8 @@ namespace Virutal_Machine
         uint m_startAddress;
         const int m_lineLength = 64;
         char[] m_currentLine;
-        bool m_newline;
+        bool m_newline = false;
+        bool m_refreshed = false;
 
         public Display(uint startAddress)
         {
@@ -27,8 +28,12 @@ namespace Virutal_Machine
                 m_newline = false;
             }
 
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(m_currentLine);
+            if (m_newline || m_refreshed)
+            {
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write(m_currentLine);
+                m_refreshed = false;
+            }
         }
 
         public int Read(uint address)
@@ -58,6 +63,7 @@ namespace Virutal_Machine
 
         public void Write(int value, uint address)
         {
+            m_refreshed = true;
             uint localAddress = address - m_startAddress;
             if (localAddress == 0)
             {

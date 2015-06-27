@@ -6,67 +6,86 @@ using System.Threading.Tasks;
 
 namespace Virutal_Machine
 {
+    enum PipelineStages
+    {
+        BranchPredict,
+        InstructionFetch,
+        InstructionDispatch,
+        Execution,
+        Retirement
+    }
+
+    enum ExecutionUnitCodes
+    {
+        SimpleALU,
+        ComplexALU,
+        Load,
+        Store
+    }
+
     class CPUCore
     {
-        uint m_instructionPointer;
-        Operations m_currentOperation;
-        int[] m_currentOperationData;
+        public uint m_instructionPointer;
+        
         CPU m_cpu;
-        int[] m_registers;
+        
+        public int[] m_registers;
+
+        public PipelineStages m_currentStage;
+
+        CoreMemeoryController m_memoryController;
+        BranchUnit m_branchUnit;
+        InstructionFetchUnit m_fetchUnit;
+        InstructionDispatchUnit m_dispatchUnit;
+        ArithmeticLogicUnit m_simpleALU;
+        ArithmeticLogicUnit m_complexALU;
+        LoadUnit m_loadUnit;
+        StoreUnit m_storeUnit;
+        RetireUnit m_retireUnit;
+
+
 
         public CPUCore(CPU cpu)
         {
             m_cpu = cpu;
             m_instructionPointer = Program.biosStartAddress;
-            m_currentOperationData = new int[3];
-            m_registers = new int[10];
-        }
+            m_registers = new int[8];
+            m_currentStage = PipelineStages.InstructionFetch;
 
-        void GetInstruction()
-        {
-            m_currentOperation = (Operations)m_cpu.m_northbridge.Read(m_instructionPointer);
-            m_currentOperationData[0] = m_cpu.m_northbridge.Read(m_instructionPointer + 4);
-            m_currentOperationData[1] = m_cpu.m_northbridge.Read(m_instructionPointer + 8);
-            m_currentOperationData[2] = (int)CPU.CycleCountsPerInstruction[(int)m_currentOperation];
-        }
-
-        void DoInstruction()
-        {
-            switch (m_currentOperation)
-            {
-                case Operations.MoveToRegister:
-                    {
-                        m_registers[m_currentOperationData[0]] = m_currentOperationData[1];
-                    }break;
-                case Operations.MoveFromRegisterToRegisterLocation:
-                    {
-                        m_cpu.m_northbridge.Write(m_registers[m_currentOperationData[0]], (uint)m_registers[m_currentOperationData[1]]);
-                    } break;
-                case Operations.AddLiteral:
-                    {
-                        m_registers[m_currentOperationData[0]] += m_currentOperationData[1];
-                    }break;
-            }
+            m_memoryController = new CoreMemeoryController(m_cpu.m_northbridge);
+            m_retireUnit = new RetireUnit(this);
+            m_simpleALU = new ArithmeticLogicUnit(false, this);
+            m_complexALU = new ArithmeticLogicUnit(true, this);
+            m_loadUnit = new LoadUnit(this);
+            m_storeUnit = new StoreUnit(this, m_memoryController);
+            m_dispatchUnit = new InstructionDispatchUnit(this, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit);
+            m_fetchUnit = new InstructionFetchUnit(this, m_memoryController, m_dispatchUnit);
+            m_branchUnit = new BranchUnit(this);
         }
 
         public void Tick()
         {
-            if (m_currentOperation == Operations.None)
+            m_memoryController.Tick();
+            switch (m_currentStage)
             {
-                GetInstruction();
-            }
-            else
-            {
-                if (m_currentOperationData[2] > 0)
-                {
-                    m_currentOperationData[2]--;
-                }
-                else
-                {
-                    DoInstruction();
-                    m_instructionPointer += CPU.InstructionSize;
-                    GetInstruction();
-                }
+                case PipelineStages.BranchPredict:
+                    m_branchUnit.Tick();
+                    break;
+                case PipelineStages.InstructionFetch:
+                    m_fetchUnit.Tick();
+                    break;
+                case PipelineStages.InstructionDispatch:
+                    m_dispatchUnit.Tick();
+                    break;
+                case PipelineStages.Execution:
+                    m_simpleALU.Tick();
+                    m_complexALU.Tick();
+                    m_loadUnit.Tick();
+                    m_storeUnit.Tick();
+                    break;
+                case PipelineStages.Retirement:
+                    m_retireUnit.Tick();
+                    break;
             }
         }
     }
