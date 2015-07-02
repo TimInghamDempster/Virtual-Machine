@@ -34,24 +34,24 @@ namespace Virutal_Machine
         {
             if (m_CPUCore.m_currentStage == PipelineStages.InstructionDispatch)
             {
-                ExecutionUnitCodes executionUnitCode = (ExecutionUnitCodes)(m_currentInstruction[0] >> 8);
+                ExecutionUnitCodes executionUnitCode = (ExecutionUnitCodes)(m_currentInstruction[0] >> 16);
                 switch (executionUnitCode)
                 {
                     case ExecutionUnitCodes.SimpleALU:
                         m_simpleALU.SetInstruction(m_currentInstruction);
-                        m_CPUCore.m_currentStage = PipelineStages.Execution;
+                        m_CPUCore.m_nextStage = PipelineStages.Execution;
                         break;
                     case ExecutionUnitCodes.ComplexALU:
                         m_complexALU.SetInstruction(m_currentInstruction);
-                        m_CPUCore.m_currentStage = PipelineStages.Execution;
+                        m_CPUCore.m_nextStage = PipelineStages.Execution;
                         break;
                     case ExecutionUnitCodes.Load:                        
                         m_loadUnit.SetInstruction(m_currentInstruction);
-                        m_CPUCore.m_currentStage = PipelineStages.Execution;
+                        m_CPUCore.m_nextStage = PipelineStages.Execution;
                         break;
                     case ExecutionUnitCodes.Store:                        
                         m_storeUnit.SetInstruction(m_currentInstruction);
-                        m_CPUCore.m_currentStage = PipelineStages.Execution;
+                        m_CPUCore.m_nextStage = PipelineStages.Execution;
                         break;
                 }
             }

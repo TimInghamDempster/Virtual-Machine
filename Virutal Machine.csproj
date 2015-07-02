@@ -44,16 +44,14 @@
     <Compile Include="ArithmeticLogicUnit.cs" />
     <Compile Include="Bios.cs" />
     <Compile Include="BranchUnit.cs" />
-    <Compile Include="Bus.cs" />
     <Compile Include="Clock.cs" />
-    <Compile Include="CoreMemeoryController.cs" />
+    <Compile Include="MemeoryController.cs" />
     <Compile Include="StoreUnit.cs" />
     <Compile Include="CPU.cs" />
     <Compile Include="CPUCore.cs" />
     <Compile Include="InstructionDispatchUnit.cs" />
     <Compile Include="Display.cs" />
     <Compile Include="InstructionFetchUnit.cs" />
-    <Compile Include="IIODevice.cs" />
     <Compile Include="LoadUnit.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

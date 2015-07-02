@@ -9,18 +9,18 @@ namespace Virutal_Machine
     class CPU
     {
         CPUCore[] m_cores;
-        public Bus m_northbridge;
         public Clock m_clock;
 
-        public static uint InstructionSize = 12;
+        MemeoryController m_memoryController;
 
-        public CPU(Bus northbridge)
+        public CPU(Bios bios, Display display)
         {
-            m_northbridge = northbridge;
             m_clock = new Clock();
 
+            m_memoryController = new MemeoryController(bios, display);
+
             m_cores = new CPUCore[1];
-            m_cores[0] = new CPUCore(this);
+            m_cores[0] = new CPUCore(m_memoryController);
         }
         
         public void Tick()

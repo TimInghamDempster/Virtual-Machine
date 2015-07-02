@@ -17,7 +17,7 @@ namespace Virutal_Machine
 
         int[] m_currentInstruction;
         bool m_hasInstruction;
-        CoreMemeoryController m_memoryController;
+        MemeoryController m_memoryController;
 
         public LoadUnit(CPUCore cPUCore)
         {

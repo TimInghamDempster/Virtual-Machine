@@ -9,33 +9,35 @@ namespace Virutal_Machine
     class InstructionFetchUnit
     {
         CPUCore m_CPUCore;
-        CoreMemeoryController m_memoryController;
+        MemeoryController m_memoryController;
         InstructionDispatchUnit m_dispatchUnit;
-        bool m_requestMade;
+        int m_memoryControllerRequestChannel;
 
-        public InstructionFetchUnit(CPUCore cPUCore, CoreMemeoryController memoryController, InstructionDispatchUnit dispatchUnit)
+        public InstructionFetchUnit(CPUCore cPUCore, MemeoryController memoryController, InstructionDispatchUnit dispatchUnit)
         {
             m_CPUCore = cPUCore;
             m_memoryController = memoryController;
             m_dispatchUnit = dispatchUnit;
+            m_memoryControllerRequestChannel = -1;
         }
 
         public void Tick()
         {
             if (m_CPUCore.m_currentStage == PipelineStages.InstructionFetch)
             {
-                if (!m_requestMade)
+                if (m_memoryControllerRequestChannel == -1)
                 {
-                    m_memoryController.RequestInstruction(m_CPUCore.m_instructionPointer);
-                    m_requestMade = true;
+                    m_memoryControllerRequestChannel = m_memoryController.Request(m_CPUCore.m_instructionPointer);
                 }
                 else
                 {
-                    if (m_memoryController.m_instructionReady)
+                    if (m_memoryController.Ready[m_memoryControllerRequestChannel])
                     {
-                        m_requestMade = false;
-                        m_dispatchUnit.SetInstruction(m_memoryController.GetInstruction());
-                        m_CPUCore.m_currentStage = PipelineStages.InstructionDispatch;
+                        int[] instruction = new int[2];
+                        m_memoryController.Read(m_memoryControllerRequestChannel, out instruction[0], out instruction[1]);
+                        m_dispatchUnit.SetInstruction(instruction);
+                        m_CPUCore.m_nextStage = PipelineStages.InstructionDispatch;
+                        m_memoryControllerRequestChannel = -1;
                     }
                 }
             }

@@ -27,13 +27,12 @@ namespace Virutal_Machine
     {
         public uint m_instructionPointer;
         
-        CPU m_cpu;
-        
         public int[] m_registers;
 
         public PipelineStages m_currentStage;
+        public PipelineStages m_nextStage;
 
-        CoreMemeoryController m_memoryController;
+        MemeoryController m_memoryController;
         BranchUnit m_branchUnit;
         InstructionFetchUnit m_fetchUnit;
         InstructionDispatchUnit m_dispatchUnit;
@@ -45,14 +44,14 @@ namespace Virutal_Machine
 
 
 
-        public CPUCore(CPU cpu)
+        public CPUCore(MemeoryController memoryController)
         {
-            m_cpu = cpu;
             m_instructionPointer = Program.biosStartAddress;
             m_registers = new int[8];
             m_currentStage = PipelineStages.InstructionFetch;
+            m_nextStage = PipelineStages.InstructionFetch;
 
-            m_memoryController = new CoreMemeoryController(m_cpu.m_northbridge);
+            m_memoryController = memoryController;
             m_retireUnit = new RetireUnit(this);
             m_simpleALU = new ArithmeticLogicUnit(false, this);
             m_complexALU = new ArithmeticLogicUnit(true, this);
@@ -66,27 +65,17 @@ namespace Virutal_Machine
         public void Tick()
         {
             m_memoryController.Tick();
-            switch (m_currentStage)
-            {
-                case PipelineStages.BranchPredict:
-                    m_branchUnit.Tick();
-                    break;
-                case PipelineStages.InstructionFetch:
-                    m_fetchUnit.Tick();
-                    break;
-                case PipelineStages.InstructionDispatch:
-                    m_dispatchUnit.Tick();
-                    break;
-                case PipelineStages.Execution:
-                    m_simpleALU.Tick();
-                    m_complexALU.Tick();
-                    m_loadUnit.Tick();
-                    m_storeUnit.Tick();
-                    break;
-                case PipelineStages.Retirement:
-                    m_retireUnit.Tick();
-                    break;
-            }
+
+            m_branchUnit.Tick();
+            m_fetchUnit.Tick();
+            m_dispatchUnit.Tick();
+            m_simpleALU.Tick();
+            m_complexALU.Tick();
+            m_loadUnit.Tick();
+            m_storeUnit.Tick();
+            m_retireUnit.Tick();
+
+            m_currentStage = m_nextStage;
         }
     }
 }

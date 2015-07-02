@@ -47,18 +47,19 @@ namespace Virutal_Machine
                 }
                 else
                 {
-                    ALUOperations instructionCode = (ALUOperations)(m_currentInstruction[0] & 0xff);
+                    ALUOperations instructionCode = (ALUOperations)((m_currentInstruction[0] >> 8) & 0xff);
+                    int registerToOperateOn = m_currentInstruction[0] & 0xff;
                     switch (instructionCode)
                     {
                         case ALUOperations.AddLiteral:
-                            m_CPUCore.m_registers[m_currentInstruction[1]] += m_currentInstruction[2];
+                            m_CPUCore.m_registers[registerToOperateOn] += m_currentInstruction[1];
                             break;
                         case ALUOperations.SetLiteral:
-                            m_CPUCore.m_registers[m_currentInstruction[1]] = m_currentInstruction[2];
+                            m_CPUCore.m_registers[registerToOperateOn] = m_currentInstruction[1];
                             break;
                     }
                     m_hasInstruction = false;
-                    m_CPUCore.m_currentStage = PipelineStages.BranchPredict;
+                    m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
                 }
             }
         }

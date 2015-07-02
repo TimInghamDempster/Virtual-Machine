@@ -9,8 +9,6 @@ namespace Virutal_Machine
     class Program
     {
         static CPU m_cpu;
-        static Bus m_northbridge;
-        static Bus m_southbridge;
         static Bios m_bios;
         static Display m_display;
 
@@ -20,17 +18,10 @@ namespace Virutal_Machine
 
         static void Main(string[] args)
         {
-
-            m_northbridge = new Bus();
-            m_southbridge = new Bus();
             m_bios = new Bios(biosStartAddress);
             m_display = new Display(displayStartAddress);
 
-            m_northbridge.Add(m_southbridge, southbridgeStartAddress);
-            m_northbridge.Add(m_display, displayStartAddress);
-            m_southbridge.Add(m_bios, biosStartAddress);
-
-            m_cpu = new CPU(m_northbridge);
+            m_cpu = new CPU(m_bios, m_display);
 
             while (true)
             {

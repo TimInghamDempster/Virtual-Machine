@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Virutal_Machine
 {
-    class Display : IIODevice
+    class Display
     {
         uint m_startAddress;
         const int m_lineLength = 64;
