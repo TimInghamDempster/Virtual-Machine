@@ -13,14 +13,17 @@ namespace Virutal_Machine
 
         MemeoryController m_memoryController;
 
-        public CPU(Bios bios, Display display)
+        InterconnectTerminal m_IOInterconnect;
+
+        public CPU(InterconnectTerminal IOInterconnect)
         {
             m_clock = new Clock();
 
-            m_memoryController = new MemeoryController(bios, display);
+            m_IOInterconnect = IOInterconnect;
+            m_memoryController = new MemeoryController();
 
             m_cores = new CPUCore[1];
-            m_cores[0] = new CPUCore(m_memoryController);
+            m_cores[0] = new CPUCore(m_IOInterconnect);
         }
         
         public void Tick()

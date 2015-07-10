@@ -10,10 +10,24 @@ namespace Virutal_Machine
     {
         uint m_startAddress;
         int[] m_biosData;
+        InterconnectTerminal m_systenInterconnect;
 
-        public Bios(uint startAddress)
+        bool m_sending;
+        int[] m_sendData;
+
+        public uint Size
         {
+            get
+            {
+                return (uint)m_biosData.Count();
+            }
+        }
+
+        public Bios(uint startAddress, InterconnectTerminal systemInterconnect)
+        {
+            m_systenInterconnect = systemInterconnect;
             m_startAddress = startAddress;
+            m_sending = false;
             m_biosData = new int[] {    ((int)ExecutionUnitCodes.SimpleALU << 16) | ((int)ALUOperations.SetLiteral << 8) | 0,                       (int)Program.displayStartAddress,    // Put display address into a register
                                         ((int)ExecutionUnitCodes.SimpleALU << 16) | ((int)ALUOperations.AddLiteral << 8) | 0,                       1,                                   // Move past control byte of display
                                         ((int)ExecutionUnitCodes.SimpleALU << 16) | ((int)ALUOperations.SetLiteral << 8) | 1,                       0x68656c6c,                          // Add the four characters "hell" to register
@@ -23,22 +37,36 @@ namespace Virutal_Machine
                                         ((int)ExecutionUnitCodes.Store << 16) |  ((int)StoreOperations.StoreToRegisterLocation << 8) | 1,           0};                                  // Move character to display
         }
 
-        public int Read(uint address)
+        public void Tick()
         {
-            uint localAddress = address - m_startAddress;
-
-            if (localAddress < m_biosData.Count())
+            if (m_systenInterconnect.HasPacket)
             {
-                return m_biosData[localAddress];
-            }
-            else
-            {
-                return 0;
-            }
-        }
+                int[] packet = new int[2];
+                m_systenInterconnect.ReadRecievedPacket(packet);
+                m_systenInterconnect.ClearRecievedPacket();
 
-        public void Write(int value, uint address)
-        {
+                uint localAddress = (uint)packet[0] - m_startAddress;
+                int readLength = packet[1];
+
+                if (localAddress < m_biosData.Count() - (readLength - 1))
+                {
+                    m_sending = true;
+                    m_sendData = new int[readLength];
+                    for (int i = 0; i < readLength; i++)
+                    {
+                        m_sendData[i] = m_biosData[localAddress + i];
+                    }
+                }
+            }
+
+            if (m_sending)
+            {
+                bool sent = m_systenInterconnect.SendPacket(m_sendData, m_sendData.Count());
+                if (sent)
+                {
+                    m_sending = false;
+                }
+            }
         }
     }
 }

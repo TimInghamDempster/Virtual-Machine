@@ -16,15 +16,17 @@ namespace Virutal_Machine
     {
         CPUCore m_CPUCore;
         MemeoryController m_memoryController;
+        InterconnectTerminal m_ioInterconnect;
 
         int[] m_currentInstruction;
         bool m_hasInstruction;
 
-        public StoreUnit(CPUCore cPUCore, MemeoryController memoryController)
+        public StoreUnit(CPUCore cPUCore, InterconnectTerminal IOInterconenct)
         {
             m_CPUCore = cPUCore;
-            m_memoryController = memoryController;
+            m_ioInterconnect = IOInterconenct;
         }
+
         public void Tick()
         {
             if (m_CPUCore.m_currentStage == PipelineStages.Execution && m_hasInstruction == true)
@@ -34,17 +36,35 @@ namespace Virutal_Machine
                 switch(operation)
                 {
                     case StoreOperations.StoreToRegisterLocation:
-                        if (m_memoryController.m_readyToStore)
                         {
-                            m_memoryController.StoreValue(m_CPUCore.m_registers[registerWithValueToStore], (uint)m_CPUCore.m_registers[m_currentInstruction[1]]);
-                            m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+                            uint address = (uint)m_CPUCore.m_registers[m_currentInstruction[1]];
+                            int value = m_CPUCore.m_registers[registerWithValueToStore];
+
+                            int[] packet = new int[2];
+                            packet[0] = (int)address;
+                            packet[1] = value;
+                            bool stored = m_ioInterconnect.SendPacket(packet, packet.Count());
+                            
+                            if (stored)
+                            {
+                                m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+                            }
                         }
                         break;
                     case StoreOperations.StoreToLiteralLocation:
-                        if (m_memoryController.m_readyToStore)
                         {
-                            m_memoryController.StoreValue(registerWithValueToStore, (uint)m_CPUCore.m_registers[m_currentInstruction[1]]);
-                            m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+                            uint address = (uint)m_currentInstruction[1];
+                            int value = m_CPUCore.m_registers[registerWithValueToStore];
+
+                            int[] packet = new int[2];
+                            packet[0] = (int)address;
+                            packet[1] = value;
+                            bool stored = m_ioInterconnect.SendPacket(packet, packet.Count());
+                            
+                            if (stored)
+                            {
+                                m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+                            }
                         }
                         break;
                 }

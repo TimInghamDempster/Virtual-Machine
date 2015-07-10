@@ -17,6 +17,7 @@ namespace Virutal_Machine
 
     enum ExecutionUnitCodes
     {
+        Nop,
         SimpleALU,
         ComplexALU,
         Load,
@@ -32,7 +33,7 @@ namespace Virutal_Machine
         public PipelineStages m_currentStage;
         public PipelineStages m_nextStage;
 
-        MemeoryController m_memoryController;
+        InterconnectTerminal m_IOInterconnect;
         BranchUnit m_branchUnit;
         InstructionFetchUnit m_fetchUnit;
         InstructionDispatchUnit m_dispatchUnit;
@@ -44,28 +45,25 @@ namespace Virutal_Machine
 
 
 
-        public CPUCore(MemeoryController memoryController)
+        public CPUCore(InterconnectTerminal IOInterconnect)
         {
             m_instructionPointer = Program.biosStartAddress;
             m_registers = new int[8];
             m_currentStage = PipelineStages.InstructionFetch;
             m_nextStage = PipelineStages.InstructionFetch;
-
-            m_memoryController = memoryController;
+            m_IOInterconnect = IOInterconnect;
             m_retireUnit = new RetireUnit(this);
             m_simpleALU = new ArithmeticLogicUnit(false, this);
             m_complexALU = new ArithmeticLogicUnit(true, this);
             m_loadUnit = new LoadUnit(this);
-            m_storeUnit = new StoreUnit(this, m_memoryController);
+            m_storeUnit = new StoreUnit(this, IOInterconnect);
             m_dispatchUnit = new InstructionDispatchUnit(this, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit);
-            m_fetchUnit = new InstructionFetchUnit(this, m_memoryController, m_dispatchUnit);
+            m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit);
             m_branchUnit = new BranchUnit(this);
         }
 
         public void Tick()
         {
-            m_memoryController.Tick();
-
             m_branchUnit.Tick();
             m_fetchUnit.Tick();
             m_dispatchUnit.Tick();

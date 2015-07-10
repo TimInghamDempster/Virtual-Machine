@@ -45,7 +45,9 @@
     <Compile Include="Bios.cs" />
     <Compile Include="BranchUnit.cs" />
     <Compile Include="Clock.cs" />
+    <Compile Include="InterconnectTerminal.cs" />
     <Compile Include="MemeoryController.cs" />
+    <Compile Include="PlatformControlHub.cs" />
     <Compile Include="StoreUnit.cs" />
     <Compile Include="CPU.cs" />
     <Compile Include="CPUCore.cs" />

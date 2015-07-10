@@ -8,20 +8,32 @@ namespace Virutal_Machine
 {
     class Display
     {
+        InterconnectTerminal m_systemInterconnect;
+
         uint m_startAddress;
         const int m_lineLength = 64;
         char[] m_currentLine;
         bool m_newline = false;
         bool m_refreshed = false;
 
-        public Display(uint startAddress)
+        public Display(uint startAddress, InterconnectTerminal systemInterconnect)
         {
             m_startAddress = startAddress;
             m_currentLine = new char[m_lineLength];
+
+            m_systemInterconnect = systemInterconnect;
         }
 
         public void Tick()
         {
+            if(m_systemInterconnect.HasPacket)
+            {
+                int[] packet = new int[m_systemInterconnect.RecievedSize];
+                m_systemInterconnect.ReadRecievedPacket(packet);
+                m_systemInterconnect.ClearRecievedPacket();
+            }
+
+
             if (m_newline)
             {
                 Console.WriteLine();
@@ -36,7 +48,7 @@ namespace Virutal_Machine
             }
         }
 
-        public int Read(uint address)
+        /*public int Read(uint address)
         {
             uint localAddress = address - m_startAddress;
             
@@ -84,6 +96,6 @@ namespace Virutal_Machine
                 m_currentLine[localAddress + 0] = (char)(value & 0xff);
                 value = value >> 8;
             }
-        }
+        }*/
     }
 }
