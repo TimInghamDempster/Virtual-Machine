@@ -18,10 +18,10 @@ namespace Virutal_Machine
     enum ExecutionUnitCodes
     {
         Nop,
-        SimpleALU,
-        ComplexALU,
-        Load,
-        Store
+        SimpleALU = 1 << 16,
+        ComplexALU = 2 << 16,
+        Load = 3 << 16,
+        Store = 4 << 16
     }
 
     class CPUCore
@@ -48,7 +48,7 @@ namespace Virutal_Machine
         public CPUCore(InterconnectTerminal IOInterconnect)
         {
             m_instructionPointer = Program.biosStartAddress;
-            m_registers = new int[8];
+            m_registers = new int[10];
             m_currentStage = PipelineStages.InstructionFetch;
             m_nextStage = PipelineStages.InstructionFetch;
             m_IOInterconnect = IOInterconnect;

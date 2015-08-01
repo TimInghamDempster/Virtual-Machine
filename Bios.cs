@@ -28,14 +28,38 @@ namespace Virutal_Machine
             m_systenInterconnect = systemInterconnect;
             m_startAddress = startAddress;
             m_sending = false;
-            m_biosData = new int[] {    ((int)ExecutionUnitCodes.SimpleALU << 16) | ((int)ALUOperations.SetLiteral << 8) | 0,                       (int)Program.displayStartAddress,    // Put display address into a register
-                                        ((int)ExecutionUnitCodes.SimpleALU << 16) | ((int)ALUOperations.AddLiteral << 8) | 0,                       1,                                   // Move past control byte of display
-                                        ((int)ExecutionUnitCodes.SimpleALU << 16) | ((int)ALUOperations.SetLiteral << 8) | 1,                       0x68656c6c,                          // Add the four characters "hell" to register
-                                        ((int)ExecutionUnitCodes.Store << 16) | ((int)StoreOperations.StoreToRegisterLocation << 8) | 1,            0,                                   // Move characters from register to display (address stored in another register)
-                                        ((int)ExecutionUnitCodes.SimpleALU << 16) | ((int)ALUOperations.AddLiteral << 8) | 0,                       4,                                   // Move display address past four characters just added
-                                        ((int)ExecutionUnitCodes.SimpleALU << 16) | ((int)ALUOperations.SetLiteral << 8) | 1,                       0x6f000000,                          // Add the character "o" to a register
-                                        ((int)ExecutionUnitCodes.Store << 16) |  ((int)StoreOperations.StoreToRegisterLocation << 8) | 1,           0};                                  // Move character to display
-        }
+			m_biosData = new int[] {	(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.SetLiteral				|	0,	0,										// Put desired cursor pos into register 0
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.SetLiteral				|	1,	0x68,									// Put character "h" into register 1
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.SetLiteral				|	2,	0,										// Put write character code into register 2
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	1,	(int)Program.displayStartAddress + 2,	// Set character
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	2,	(int)Program.displayStartAddress,		// Write character
+										
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.AddLiteral				|	0,	1,										// Increment cursor pos register
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.SetLiteral				|	1,	0x65,									// Put character "e" into register 1
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	1,	(int)Program.displayStartAddress + 2,	// Set character
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	2,	(int)Program.displayStartAddress,		// Write character
+										
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.AddLiteral				|	0,	1,										// Increment cursor pos register
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.SetLiteral				|	1,	0x6c,									// Put character "l" into register 1
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	1,	(int)Program.displayStartAddress + 2,	// Set character
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	2,	(int)Program.displayStartAddress,		// Write character
+										
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.AddLiteral				|	0,	1,										// Increment cursor pos register
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.SetLiteral				|	1,	0x6c,									// Put character "l" into register 1
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	1,	(int)Program.displayStartAddress + 2,	// Set character
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	2,	(int)Program.displayStartAddress,		// Write character
+										
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.AddLiteral				|	0,	1,										// Increment cursor pos register
+										(int)ExecutionUnitCodes.SimpleALU	|	(int)ALUOperations.SetLiteral				|	1,	0x6f,									// Put character "o" into register 1
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	1,	(int)Program.displayStartAddress + 2,	// Set character
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	2,	(int)Program.displayStartAddress,		// Write character
+			};
+		}
 
         public void Tick()
         {

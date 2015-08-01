@@ -24,7 +24,7 @@ namespace Virutal_Machine
 
         public const uint PCHStartAddress = 128;
         public const uint biosStartAddress = 128;
-        public const uint displayStartAddress = biosStartAddress + 14;
+        public const uint displayStartAddress = biosStartAddress + 1024;
 
         static uint tickCount;
 
@@ -41,8 +41,8 @@ namespace Virutal_Machine
 
             m_PCH = new PlatformControlHub(m_PCH_CPU_Interconnect, PCHStartAddress);
 
-            m_PCH.AddDevice(m_PCH_BIOS_Interconnect, m_bios.Size);
-            m_PCH.AddDevice(m_PCH_Display_Interconnect, 2);
+            m_PCH.AddDevice(m_PCH_BIOS_Interconnect, 1024);
+            m_PCH.AddDevice(m_PCH_Display_Interconnect, 4);
 
 
 

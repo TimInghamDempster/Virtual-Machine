@@ -9,7 +9,8 @@ namespace Virutal_Machine
     enum ALUOperations
     {
         AddLiteral,
-        SetLiteral
+        SetLiteral = 1 << 8,
+        CopyRegister = 2 << 8
     }
 
     class ArithmeticLogicUnit
@@ -34,7 +35,8 @@ namespace Virutal_Machine
             m_cycleCountsPerInstruction = new Dictionary<ALUOperations, uint>();
 
             m_cycleCountsPerInstruction.Add(ALUOperations.AddLiteral, 1);
-            m_cycleCountsPerInstruction.Add(ALUOperations.SetLiteral, 1);
+			m_cycleCountsPerInstruction.Add(ALUOperations.SetLiteral, 1);
+			m_cycleCountsPerInstruction.Add(ALUOperations.CopyRegister, 1);
         }
 
         public void Tick()
@@ -47,7 +49,7 @@ namespace Virutal_Machine
                 }
                 else
                 {
-                    ALUOperations instructionCode = (ALUOperations)((m_currentInstruction[0] >> 8) & 0xff);
+                    ALUOperations instructionCode = (ALUOperations)(m_currentInstruction[0] & 0x0000ff00);
                     int registerToOperateOn = m_currentInstruction[0] & 0xff;
                     switch (instructionCode)
                     {
@@ -56,6 +58,9 @@ namespace Virutal_Machine
                             break;
                         case ALUOperations.SetLiteral:
                             m_CPUCore.m_registers[registerToOperateOn] = m_currentInstruction[1];
+                            break;
+                        case ALUOperations.CopyRegister:
+                            m_CPUCore.m_registers[registerToOperateOn] = m_CPUCore.m_registers[m_currentInstruction[1]];
                             break;
                     }
                     m_hasInstruction = false;
@@ -68,7 +73,7 @@ namespace Virutal_Machine
         {
             m_hasInstruction = true;
             m_currentInstruction = instruction;
-            m_currentInstructionTimeRemaining = m_cycleCountsPerInstruction[(ALUOperations)(instruction[0] & 0xff)] - 1;
+            m_currentInstructionTimeRemaining = m_cycleCountsPerInstruction[(ALUOperations)(instruction[0] & 0x0000ff00)] - 1;
         }
     }
 }

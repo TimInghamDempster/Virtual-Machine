@@ -1,5 +1,10 @@
 Machine Language Reference
 
-MoveToRegister RegisterNumber dataLocation Cost=3
-MoveFromRegisterToRegisterLocation SourceRegisterNumber DestinationLocationRegisterNumber Cost=3
-AddLiteral	RegisterNumber ValueToAdd Cost=4
+ALUOperations
+	AddLiteral adds the number in the argument to the specified register
+	SetLiteral sets the specified register to the number in the argument
+	CopyRegister sets the specified register to the value of the register specified in the argument
+	
+LoadOperations
+	StoreToRegisterLocation stores the value in the specified register to the address in the register specified in the argument
+	StoreToLiteralLocation stores the value in the specified register to the address in the argument

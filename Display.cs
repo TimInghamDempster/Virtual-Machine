@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace Virutal_Machine
 {
+    enum DisplayCommands
+    {
+        WriteChar,
+        Newline
+    }
+
     class Display
     {
         InterconnectTerminal m_systemInterconnect;
@@ -15,6 +21,9 @@ namespace Virutal_Machine
         char[] m_currentLine;
         bool m_newline = false;
         bool m_refreshed = false;
+
+        int m_cursorPos;
+        char m_currentChar;
 
         public Display(uint startAddress, InterconnectTerminal systemInterconnect)
         {
@@ -30,9 +39,36 @@ namespace Virutal_Machine
             {
                 int[] packet = new int[m_systemInterconnect.RecievedSize];
                 m_systemInterconnect.ReadRecievedPacket(packet);
-                m_systemInterconnect.ClearRecievedPacket();
-            }
 
+                m_systemInterconnect.ClearRecievedPacket();
+
+                if (packet[0] == (int)m_startAddress)
+                {
+                    switch ((DisplayCommands)packet[1])
+                    {
+                        case DisplayCommands.Newline:
+                            {
+                                m_newline = true;
+                            } break;
+                        case DisplayCommands.WriteChar:
+                            {
+                                m_currentLine[m_cursorPos] = m_currentChar;
+								m_refreshed = true;
+                            } break;
+                    }
+                }
+                else if (packet[0] == (int)m_startAddress + 1)
+                {
+                    if (packet[1] > 0 && packet[1] < m_currentLine.Count())
+                    {
+                        m_cursorPos = packet[1];
+                    }
+                }
+                else if (packet[0] == (int)m_startAddress + 2)
+                {
+                    m_currentChar = (char)packet[1];
+                }
+            }
 
             if (m_newline)
             {
@@ -47,55 +83,5 @@ namespace Virutal_Machine
                 m_refreshed = false;
             }
         }
-
-        /*public int Read(uint address)
-        {
-            uint localAddress = address - m_startAddress;
-            
-            if (localAddress < m_currentLine.Count() && localAddress > 0)
-            {
-                localAddress--;
-                int retval = 0;
-
-                retval += m_currentLine[localAddress + 0];
-                retval = retval << 8;
-                retval += m_currentLine[localAddress + 1];
-                retval = retval << 8;
-                retval += m_currentLine[localAddress + 2];
-                retval = retval << 8;
-                retval += m_currentLine[localAddress + 3];
-
-                return retval;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-
-        public void Write(int value, uint address)
-        {
-            m_refreshed = true;
-            uint localAddress = address - m_startAddress;
-            if (localAddress == 0)
-            {
-                if (value != 0)
-                {
-                    m_newline = true;
-                }
-            }
-            else if (localAddress < m_currentLine.Count() && localAddress > 0)
-            {
-                localAddress--;
-                m_currentLine[localAddress + 3] = (char)(value & 0xff);
-                value = value >> 8;
-                m_currentLine[localAddress + 2] = (char)(value & 0xff);
-                value = value >> 8;
-                m_currentLine[localAddress + 1] = (char)(value & 0xff);
-                value = value >> 8;
-                m_currentLine[localAddress + 0] = (char)(value & 0xff);
-                value = value >> 8;
-            }
-        }*/
     }
 }

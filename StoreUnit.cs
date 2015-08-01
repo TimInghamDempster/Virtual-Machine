@@ -9,13 +9,12 @@ namespace Virutal_Machine
     enum StoreOperations
     {
         StoreToRegisterLocation,
-        StoreToLiteralLocation
+        StoreToLiteralLocation = 1 << 8
     }
 
     class StoreUnit
     {
         CPUCore m_CPUCore;
-        MemeoryController m_memoryController;
         InterconnectTerminal m_ioInterconnect;
 
         int[] m_currentInstruction;
@@ -31,7 +30,7 @@ namespace Virutal_Machine
         {
             if (m_CPUCore.m_currentStage == PipelineStages.Execution && m_hasInstruction == true)
             {
-                StoreOperations operation = (StoreOperations)((m_currentInstruction[0] >> 8) & 0xff);
+                StoreOperations operation = (StoreOperations)(m_currentInstruction[0] & 0x0000ff00);
                 int registerWithValueToStore = m_currentInstruction[0] & 0xff;
                 switch(operation)
                 {
