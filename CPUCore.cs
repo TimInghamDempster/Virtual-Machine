@@ -18,10 +18,11 @@ namespace Virutal_Machine
     enum ExecutionUnitCodes
     {
         Nop,
-        SimpleALU = 1 << 16,
-        ComplexALU = 2 << 16,
-        Load = 3 << 16,
-        Store = 4 << 16
+        ALU	= 1 << 16,
+        Load		= 2 << 16,
+        Store		= 3 << 16,
+		Branch		= 4 << 16,
+		Fetch		= 5 << 16
     }
 
     class CPUCore
@@ -55,11 +56,11 @@ namespace Virutal_Machine
             m_retireUnit = new RetireUnit(this);
             m_simpleALU = new ArithmeticLogicUnit(false, this);
             m_complexALU = new ArithmeticLogicUnit(true, this);
-            m_loadUnit = new LoadUnit(this);
+            m_loadUnit = new LoadUnit(this, m_IOInterconnect);
             m_storeUnit = new StoreUnit(this, IOInterconnect);
-            m_dispatchUnit = new InstructionDispatchUnit(this, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit);
-            m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit);
             m_branchUnit = new BranchUnit(this);
+            m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit);
+            m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit);
         }
 
         public void Tick()

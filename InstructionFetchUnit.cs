@@ -9,7 +9,6 @@ namespace Virutal_Machine
     class InstructionFetchUnit
     {
         CPUCore m_CPUCore;
-        //MemeoryController m_memoryController;
         InstructionDispatchUnit m_dispatchUnit;
         InterconnectTerminal m_IOInterconnect;
 
@@ -29,10 +28,12 @@ namespace Virutal_Machine
             {                
                 if (m_waitingForMemory == false)
                 {
-                    int[] newPacket = new int[2];
+                    int[] newPacket = new int[3];
                     newPacket[0] = (int)m_CPUCore.m_instructionPointer;
                     newPacket[1] = 2;
-                    bool requestSent = m_IOInterconnect.SendPacket(newPacket, 2);
+					newPacket[2] = (int)ExecutionUnitCodes.Fetch;
+                    
+					bool requestSent = m_IOInterconnect.SendPacket(newPacket, 3);
 
                     if(requestSent)
                     {
@@ -43,12 +44,16 @@ namespace Virutal_Machine
                 {
                     if(m_IOInterconnect.HasPacket)
                     {
-                        int[] recivedPacket = new int[2];
+                        int[] recivedPacket = new int[m_IOInterconnect.RecievedSize];
                         m_IOInterconnect.ReadRecievedPacket(recivedPacket);
-                        m_IOInterconnect.ClearRecievedPacket();
-                        m_dispatchUnit.SetInstruction(recivedPacket);
-                        m_waitingForMemory = false;
-                        m_CPUCore.m_nextStage = PipelineStages.InstructionDispatch;
+						
+						if(recivedPacket[m_IOInterconnect.RecievedSize - 1] == (int)ExecutionUnitCodes.Fetch)
+						{
+							m_IOInterconnect.ClearRecievedPacket();
+							m_dispatchUnit.SetInstruction(recivedPacket);
+							m_waitingForMemory = false;
+							m_CPUCore.m_nextStage = PipelineStages.InstructionDispatch;
+						}
                     }
                 }
             }

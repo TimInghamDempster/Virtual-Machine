@@ -10,23 +10,15 @@ Lesson 1: Setting up the project and moving a value into a register
 	Add Core[1] Cores to CPU
 	Edit CPU.Tick()
 		Core[0].Tick()
-	Create an IIODevice interface
-		int Read(source)
-		Write(value, destination)
-	Create a Bus class which implements IIODevice
-		Needs internal routing code
-	Add a Bus Northbridge to the CPU
-	Add a Bus Southbdidge to the Northbridge
 	Create a Bios class which implements IDevice
-	Add a Bios object to the Southbridge
+	Add a Bios object to the core
 	Add an instruction pointer to the Core and initialise to the address of the Bios
+	
+	***Edited To Here***
+	
 	Create an Operation enum
 		None = -1
 		Move
-	Create an Instruction struct
-		Operation operation
-		Int data 1
-		Int data 2
 	Add an array of instructions to the Bios class
 	Add an array of registers to the CPU class
 	Add an instruction to the Bios

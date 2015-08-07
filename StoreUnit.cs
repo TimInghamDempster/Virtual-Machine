@@ -39,13 +39,15 @@ namespace Virutal_Machine
                             uint address = (uint)m_CPUCore.m_registers[m_currentInstruction[1]];
                             int value = m_CPUCore.m_registers[registerWithValueToStore];
 
-                            int[] packet = new int[2];
+                            int[] packet = new int[3];
                             packet[0] = (int)address;
                             packet[1] = value;
+							packet[2] = (int)ExecutionUnitCodes.Store;
                             bool stored = m_ioInterconnect.SendPacket(packet, packet.Count());
                             
                             if (stored)
                             {
+								m_hasInstruction = false;
                                 m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
                             }
                         }
@@ -55,13 +57,15 @@ namespace Virutal_Machine
                             uint address = (uint)m_currentInstruction[1];
                             int value = m_CPUCore.m_registers[registerWithValueToStore];
 
-                            int[] packet = new int[2];
+                            int[] packet = new int[3];
                             packet[0] = (int)address;
-                            packet[1] = value;
+							packet[1] = value;
+							packet[2] = (int)ExecutionUnitCodes.Store;
                             bool stored = m_ioInterconnect.SendPacket(packet, packet.Count());
                             
                             if (stored)
                             {
+								m_hasInstruction = false;
                                 m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
                             }
                         }

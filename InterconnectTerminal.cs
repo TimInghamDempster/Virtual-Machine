@@ -120,7 +120,5 @@ namespace Virutal_Machine
                 }
             }
         }
-
-        
     }
 }
