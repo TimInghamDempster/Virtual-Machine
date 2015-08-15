@@ -91,10 +91,6 @@ namespace Virutal_Machine
 				}
 				else
 				{
-					if (m_sendData[m_sendData.Length - 1] == 0x20000)
-					{
-						int a = 0;
-					}
 					bool sent = m_systenInterconnect.SendPacket(m_sendData, m_sendData.Count());
 					if (sent)
 					{
