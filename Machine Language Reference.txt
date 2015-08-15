@@ -5,6 +5,12 @@ ALUOperations
 	SetLiteral sets the specified register to the number in the argument
 	CopyRegister sets the specified register to the value of the register specified in the argument
 	
-LoadOperations
+StoreOperations
 	StoreToRegisterLocation stores the value in the specified register to the address in the register specified in the argument
 	StoreToLiteralLocation stores the value in the specified register to the address in the argument
+	
+LoadOperations
+	LoadFromRegisterLocation loads a value from the location in the register specified in the argument into the specified register
+
+BranchOperations
+	Jump jumps execution to the address specified in the argument

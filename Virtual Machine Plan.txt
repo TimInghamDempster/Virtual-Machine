@@ -13,72 +13,103 @@ Lesson 1: Setting up the project and moving a value into a register
 	Create a Bios class which implements IDevice
 	Add a Bios object to the core
 	Add an instruction pointer to the Core and initialise to the address of the Bios
+	Create classes for instruction fetch unit, dispatch unit, alu, load unit, store unit, branch unit
+	Create a temporary GetData function in the Bios
+	Create a double buffered pipeline stage enum
+	Tick all of the core sub-units
+	If pipelineStage == instruction fetch
+		Grab two ints from the bios and pass to dispatch unit
+		Increment the instruction pointer by two
+		Set pipelineStage to dispatch unit
 	
-	***Edited To Here***
+	Current development position
 	
-	Create an Operation enum
-		None = -1
-		Move
-	Add an array of instructions to the Bios class
-	Add an array of registers to the CPU class
-	Add an instruction to the Bios
-		Move r0 Ox48 // "H"
-	Create Operation Core.operation
-	Create int[3] Core.InstructionData
-	Add int[Operation.Count - 1] CPU.CyclesPerInstuction
-	Create Core.GetInstruction()
-		Set Core.Operation based on instruction pointer
-		Read 2 ints from the instruction pointer into Core.Instruction
-		set Core.Instrucion[3] = CPU.CyclesPerInstruction[Core.Operation];
-	Create Core.DoInstruction()
-	Edit Core.Tick()
-		If(Core.Instruction[0] == Operation.None)
-			Core.GetInstruction()
-		Else
-			if(Core.Instruction[3] > 0)
-				Core.Instruction[3]--
-			Else
-				Core.DoInstruction
-				Core.InstructionPointer += 12
-	Edit Core.DoInstruction to do the instruction
+	Create enum for execution unit
+	If pipelineStage == instruction dispatch
+		Pass instruction to correct execution unit
+		Set pipelineStage to execution
+	Create a set of registers in the Core
+	Add ALU setliteral
+		if pipelineStage == execution
+			Set register to value
+			Set pipelineStage to branch predict
+	Implement very basic branch predict
+		if pipelineStage == branchPredict
+			Move instructionPointer increment into branch predict unit
+			Set piplineStage to instruction fetch
 	
 Lesson 2: Adding a display and writing characters to it
-	Create a Display class which derives from IDevice
+	Create a Display class
 		Maps the first byte of data to a command flag
-			Only command is NewLine
-		Maps the next n bytes to chars which are displayed via the console
-	Add a display to CPU.Northbridge
-	Add instructions to the bios
-		Move 0xWhereverTheDisplayStarts r1 // Store the display memory location in a register
-		Move r1 r2
-	Add new operation
-		Add
-	Add instructions to the bios
-		Add r2 1
-		Move r0 r2
-	Run
-	Add instructions to the bios
-		Repeat the instructions copying from bios to screen for: 0x65 0x6c 0x6c 0x6f
-	Run
+			Only commands are NewLine and Commit
+		Maps the second byte to the character position
+		Maps the third byte to the character
+	Create an interlink class
+		Give it a pointer to the other end interlink object
+		Give it a TrySendPacket function
+		Give it a HasPacket property
+		Give it a ReadPacket function
+		Give it a ClearPacket function
+		Give it a Tick function
+			Transfer an int from send buffer to recieve buffer at other end if transmission countdown reached zero
+			Decrement transmission countdown otherwise
+	Remove the Bios.GetData funtion and replace it with an interlink
+	Create a PlatformControlHubClass
+		Give it a CPU interlink
+		Give it a list of IO interlinks
+		Give it a Tick function
+			Check CPU interlink for new packet
+				ReadPacket, find outgoing interlink and try sending packet down it, clear CPU interlink if sucessful
+			Check each IO interlink for new packet
+				ReadPacket, try sending down CPU interlink, clear incoming interlink if successful
+	Hook up interlinks
+		CPU <-> PCH
+		PCH <-> Bios
+		PCH <-> Display
+	Create StoreToLiteralLocation instruction
+		In StoreUnit.Tick
+			If pipelineStage == execution
+				Create a message to store the value and try to push it to the PCH
+				If successful set pipelineStage to branchPredict
+	Write a bios program
+		Set literal r0 = 0
+		Set literal r1 = ASCII code for 'h'
+		Set literal r2 = display commit comand
+		Store to literalLocation r0 to display cursor address
+		Store to literalLocation r1 to display character address
+		Store to literalLocation r2 to display command address
+		
+	Write enhanced bios program
+		Repeat program from before for characters 'e' 'l' 'l' 'o'
 	
-Lesson 3 Loops, conditionals, interrupts, and the Keyboard
-	Add a jmp operator
-	Modify bios program to overwrite display character in a loop
-	Add a list of interrupt pointers to the Core
-	Create a keyboard class which implements IIODevice
-	Add a keyboard to the southbridge
-	Create instruction: MoveToRegisterFromRegisterLocation
-	Have the bios set up a an interrupt pointer for the keyboard
-	Create an interupt handler that stuffs the key that has been presed into the register the bios program is reading into the display
-	Modify the bios program to incrememnt the current character writing to the display
-	Create a Compare operator
-	Create a JumpEqual operator
-	Modify the bios program
-		Conditional jump out of main loop when reaching end of display line
-			Send newline to display
-			Move line position on display back to start of line
-			Jump back to loop
+Lesson 3 Loops and indirection 
+	Write the ascii code for 'h' to the end of the bios program
+	Change line 2 of bios program
+	Set literal r1 to location of 'h' character
+	Create LoadFromRegisterLocation instruction
+		Send a memory request to PCH
+		When request returns set piplineStage to branchPredict
+	Add new line to bios program after line 3
+		Load data from address in r1 into r3
+	Modify penultimate line
+		Store from r3, not r1
+	Create AddLiteral ALU instruction
+	Add ASCII codes for 'e' 'l' 'l' 'o' ' ' 'w' 'o' 'r' 'l' 'd' to data section of bios program
+	Use AddLiteral to increment r0 and r1 by 1 at end of bios program
+	Add Jump instruction to branch predict
+		Change instructionPointer
+		Set pipelineStage to instructionFetch
+	Modify dispatchUnit to skip execution stage on branch instruction
+	Delete all but first iteration of bios program
+	Add Jump to line 4 to end of bios program
+	Update data load location
+	
+	Current state of my lookahead project
 
-Lesson 4 Memory and Storage
+Lesson 4 conditionals, interrupts, and the Keyboard
+
+Lesson 5 Memory and Storage
+
+Lesson 6 Block devices
 
 	

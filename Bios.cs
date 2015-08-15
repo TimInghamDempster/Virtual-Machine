@@ -6,28 +6,31 @@ using System.Threading.Tasks;
 
 namespace Virutal_Machine
 {
-    class Bios
-    {
-        uint m_startAddress;
-        int[] m_biosData;
-        InterconnectTerminal m_systenInterconnect;
+	class Bios
+	{
+		uint m_startAddress;
+		int[] m_biosData;
+		InterconnectTerminal m_systenInterconnect;
 
-        bool m_sending;
-        int[] m_sendData;
+		bool m_sending;
+		int[] m_sendData;
+		int m_sendCountdown;
 
-        public uint Size
-        {
-            get
-            {
-                return (uint)m_biosData.Count();
-            }
-        }
+		const int CyclesPerAccess = 1000; // assumes 500ns at 2.0GHz
 
-        public Bios(uint startAddress, InterconnectTerminal systemInterconnect)
-        {
-            m_systenInterconnect = systemInterconnect;
-            m_startAddress = startAddress;
-            m_sending = false;
+		public uint Size
+		{
+			get
+			{
+				return (uint)m_biosData.Count();
+			}
+		}
+
+		public Bios(uint startAddress, InterconnectTerminal systemInterconnect)
+		{
+			m_systenInterconnect = systemInterconnect;
+			m_startAddress = startAddress;
+			m_sending = false;
 			m_biosData = new int[] {
 										// Instructions
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral				|	0,	0,										// Put desired cursor pos into register 0
@@ -56,41 +59,49 @@ namespace Virutal_Machine
 			};
 		}
 
-        public void Tick()
-        {
-            if (m_systenInterconnect.HasPacket)
-            {
-                int[] packet = new int[3];
-                m_systenInterconnect.ReadRecievedPacket(packet);
-                m_systenInterconnect.ClearRecievedPacket();
+		public void Tick()
+		{
+			if (m_systenInterconnect.HasPacket)
+			{
+				int[] packet = new int[3];
+				m_systenInterconnect.ReadRecievedPacket(packet);
+				m_systenInterconnect.ClearRecievedPacket();
 
-                uint localAddress = (uint)packet[0] - m_startAddress;
-                int readLength = packet[1];
+				uint localAddress = (uint)packet[0] - m_startAddress;
+				int readLength = packet[1];
 
-                if (localAddress < m_biosData.Count() - (readLength - 1))
-                {
-                    m_sending = true;
-                    m_sendData = new int[readLength + 1];
-                    for (int i = 0; i < readLength; i++)
-                    {
-                        m_sendData[i] = m_biosData[localAddress + i];
-                    }
-					m_sendData[m_sendData.Length - 1] = packet[2];
-                }
-            }
-
-            if (m_sending)
-            {
-				if(m_sendData[m_sendData.Length - 1] == 0x20000)
+				if (localAddress < m_biosData.Count() - (readLength - 1))
 				{
-					int a = 0;
+					m_sending = true;
+					m_sendData = new int[readLength + 1];
+					for (int i = 0; i < readLength; i++)
+					{
+						m_sendData[i] = m_biosData[localAddress + i];
+					}
+					m_sendData[m_sendData.Length - 1] = packet[2];
+					m_sendCountdown = CyclesPerAccess;
 				}
-                bool sent = m_systenInterconnect.SendPacket(m_sendData, m_sendData.Count());
-                if (sent)
-                {
-                    m_sending = false;
-                }
-            }
-        }
-    }
+			}
+
+			if (m_sending)
+			{
+				if (m_sendCountdown > 0)
+				{
+					m_sendCountdown--;
+				}
+				else
+				{
+					if (m_sendData[m_sendData.Length - 1] == 0x20000)
+					{
+						int a = 0;
+					}
+					bool sent = m_systenInterconnect.SendPacket(m_sendData, m_sendData.Count());
+					if (sent)
+					{
+						m_sending = false;
+					}
+				}
+			}
+		}
+	}
 }
