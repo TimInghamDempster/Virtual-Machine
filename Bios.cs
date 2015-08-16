@@ -33,18 +33,29 @@ namespace Virutal_Machine
 			m_sending = false;
 			m_biosData = new int[] {
 										// Instructions
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral				|	0,	0,										// Put desired cursor pos into register 0
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral				|	1,	(int)m_startAddress + 20,				// Put location of start of string into register 1
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral				|	2,	0,										// Put write character code into register 2
-										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromRegisterLocation|	3,	1,										// Load the value from the location specified in register 1 into register 3
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	3,	(int)Program.displayStartAddress + 2,	// Set character
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation	|	2,	(int)Program.displayStartAddress,		// Write character
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral				|	1,	1,										// Increment string pointer
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral				|	0,	1,										// Increment cursor position register
-										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,							(int)m_startAddress + 6,				// Loop
+
+										// Set up keyboard interrupt handler
+										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.SetInterrupt			|	0,	(int)m_startAddress + 4,				// Set interrupt 0 (keyboard) to address 4
+										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,								(int)m_startAddress + 8,				// Jump to program start
+
+										// Keyboard interrupt handler
+										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromLiteralLocation		|	9,	(int)Program.keyboardStartAddress,		// Copy last key pressed into register 9
+										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn,				0,										// Return to execution
+
+										// Write "Hello world"
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0,	0,										// Put desired cursor pos into register 0
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1,	(int)m_startAddress + 28,				// Put location of start of string into register 1
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2,	0,										// Put write character code into register 2
+										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromRegisterLocation	|	3,	1,										// Load the value from the location specified in register 1 into register 3
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	3,	(int)Program.displayStartAddress + 2,	// Set character
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	2,	(int)Program.displayStartAddress,		// Write character
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1,	1,										// Increment string pointer
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	0,	1,										// Increment cursor position register
+										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,								(int)m_startAddress + 14,				// Loop
 										
 										// Data section
+										// "Hello world"
 										0x00000068,
 										0x00000065,
 										0x0000006c,
@@ -70,17 +81,19 @@ namespace Virutal_Machine
 				uint localAddress = (uint)packet[0] - m_startAddress;
 				int readLength = packet[1];
 
+				m_sending = true;
+				m_sendData = new int[readLength + 1];
+
 				if (localAddress < m_biosData.Count() - (readLength - 1))
 				{
-					m_sending = true;
-					m_sendData = new int[readLength + 1];
-					for (int i = 0; i < readLength; i++)
+					for (int i = 1; i < readLength + 1; i++)
 					{
-						m_sendData[i] = m_biosData[localAddress + i];
+						m_sendData[i] = m_biosData[localAddress + i - 1];
 					}
-					m_sendData[m_sendData.Length - 1] = packet[2];
-					m_sendCountdown = CyclesPerAccess;
 				}
+
+				m_sendData[0] = packet[2];
+				m_sendCountdown = CyclesPerAccess;
 			}
 
 			if (m_sending)

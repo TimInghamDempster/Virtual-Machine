@@ -60,6 +60,11 @@ namespace Virutal_Machine
 							m_branchUnit.SetInstruction(m_currentInstruction);
 							m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
 						} break;
+					case ExecutionUnitCodes.Interrupt:
+						{
+							m_CPUCore.m_interruptController.SetInstruction(m_currentInstruction);
+							m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+						}break;
 				}
 			}
 		}

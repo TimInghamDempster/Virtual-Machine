@@ -8,7 +8,7 @@ namespace Virutal_Machine
 {
     class CPU
     {
-        CPUCore[] m_cores;
+        public CPUCore[] m_cores;
         public Clock m_clock;
 
         MemeoryController m_memoryController;

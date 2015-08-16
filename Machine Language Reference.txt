@@ -14,3 +14,8 @@ LoadOperations
 
 BranchOperations
 	Jump jumps execution to the address specified in the argument
+	
+InterruptController
+	SetInterrupt sets the pointer for the interrupt specified in the instruction to the pointer specified in the argument
+	CallInterrupt Not Implemented Yet
+	InterruptReturn set the instructionPointer back to the position stored before the interrupt

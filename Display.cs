@@ -20,7 +20,6 @@ namespace Virutal_Machine
         const int m_lineLength = 64;
         char[] m_currentLine;
         bool m_newline = false;
-        bool m_refreshed = false;
 
         int m_cursorPos;
         char m_currentChar;
@@ -53,7 +52,6 @@ namespace Virutal_Machine
                         case DisplayCommands.WriteChar:
                             {
                                 m_currentLine[m_cursorPos] = m_currentChar;
-								m_refreshed = true;
                             } break;
                     }
                 }
@@ -75,13 +73,9 @@ namespace Virutal_Machine
                 Console.WriteLine();
                 m_newline = false;
             }
-
-            if (m_newline || m_refreshed)
-            {
-                Console.SetCursorPosition(0, Console.CursorTop);
-                Console.Write(m_currentLine);
-                m_refreshed = false;
-            }
+			Console.SetCursorPosition(0, Console.CursorTop);
+			Console.Write(m_currentLine);
+			Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);     
         }
     }
 }

@@ -107,7 +107,23 @@ Lesson 3 Loops and indirection
 	Current state of my lookahead project
 
 Lesson 4 conditionals, interrupts, and the Keyboard
-
+	Create keyboard class
+		Use IsKeyAvailable and ReadKey to poll the keyboard
+	Create interrupt handler class and add to core
+		Pass to constructor of keyboard
+	Add an interconnect from the keyboard to the pch
+	Add a "set interrupt" instruction
+		Dispatch to PIC, handle immediately
+	Create an interruptReturn instruction
+		Set the instruction pointer back to the stored one
+	Update bios program
+		Set the interrupt handler for keyboard
+		Jump over handler to program execution
+		Write handler
+			Load value from keyboard to register
+			Call interruptReturn
+		Move all the memory addresses in the old program to match new locations
+			
 Lesson 5 Memory and Storage
 
 Lesson 6 Block devices

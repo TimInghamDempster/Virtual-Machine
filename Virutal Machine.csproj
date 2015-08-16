@@ -46,6 +46,8 @@
     <Compile Include="BranchUnit.cs" />
     <Compile Include="Clock.cs" />
     <Compile Include="InterconnectTerminal.cs" />
+    <Compile Include="InterruptController.cs" />
+    <Compile Include="Keyboard.cs" />
     <Compile Include="MemeoryController.cs" />
     <Compile Include="PlatformControlHub.cs" />
     <Compile Include="StoreUnit.cs" />

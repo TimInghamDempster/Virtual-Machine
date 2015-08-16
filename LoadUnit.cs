@@ -9,7 +9,8 @@ namespace Virutal_Machine
 	enum LoadOperations
 	{
 		Nop,
-		LoadFromRegisterLocation = 1 << 8
+		LoadFromRegisterLocation = 1 << 8,
+		LoadFromLiteralLocation = 2 << 8
 	}
 
 	class LoadUnit
@@ -51,24 +52,50 @@ namespace Virutal_Machine
 						}
 						else
 						{
-							if (m_IOInterconnect.HasPacket)
-							{
-								int[] recivedPacket = new int[m_IOInterconnect.RecievedSize];
-								m_IOInterconnect.ReadRecievedPacket(recivedPacket);
-
-								if (recivedPacket[m_IOInterconnect.RecievedSize - 1]  == (int)ExecutionUnitCodes.Load)
-								{
-									m_IOInterconnect.ClearRecievedPacket();
-									m_waitingForMemory = false;
-									m_hasInstruction = false;
-
-									m_CPUCore.m_registers[m_currentInstruction[0] & 0x000000ff] = recivedPacket[0];
-
-									m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
-								}
-							}
+							WaitForLoad();
 						}
 					}break;
+					case LoadOperations.LoadFromLiteralLocation:
+						{
+							if (m_waitingForMemory == false)
+							{
+								int[] newPacket = new int[3];
+								newPacket[0] = m_currentInstruction[1];
+								newPacket[1] = 1;
+								newPacket[2] = (int)ExecutionUnitCodes.Load;
+
+								bool requestSent = m_IOInterconnect.SendPacket(newPacket, 3);
+
+								if (requestSent)
+								{
+									m_waitingForMemory = true;
+								}
+							}
+							else
+							{
+								WaitForLoad();
+							}
+						} break;
+				}
+			}
+		}
+
+		void WaitForLoad()
+		{
+			if (m_IOInterconnect.HasPacket)
+			{
+				int[] recivedPacket = new int[m_IOInterconnect.RecievedSize];
+				m_IOInterconnect.ReadRecievedPacket(recivedPacket);
+
+				if (recivedPacket[0] == (int)ExecutionUnitCodes.Load)
+				{
+					m_IOInterconnect.ClearRecievedPacket();
+					m_waitingForMemory = false;
+					m_hasInstruction = false;
+
+					m_CPUCore.m_registers[m_currentInstruction[0] & 0x000000ff] = recivedPacket[1];
+
+					m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
 				}
 			}
 		}

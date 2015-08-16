@@ -22,12 +22,14 @@ namespace Virutal_Machine
         Load		= 2 << 16,
         Store		= 3 << 16,
 		Branch		= 4 << 16,
-		Fetch		= 5 << 16
+		Fetch		= 5 << 16,
+		Interrupt	= 6 << 16
     }
 
     class CPUCore
     {
         public uint m_instructionPointer;
+		public uint m_storedIPointer;
         
         public int[] m_registers;
 
@@ -43,11 +45,13 @@ namespace Virutal_Machine
         LoadUnit m_loadUnit;
         StoreUnit m_storeUnit;
         RetireUnit m_retireUnit;
+		public InterruptController m_interruptController;
 
 
 
         public CPUCore(InterconnectTerminal IOInterconnect)
-        {
+		{
+			m_interruptController = new InterruptController(this);
             m_instructionPointer = Program.biosStartAddress;
             m_registers = new int[10];
             m_currentStage = PipelineStages.InstructionFetch;
@@ -65,6 +69,7 @@ namespace Virutal_Machine
 
         public void Tick()
         {
+			m_interruptController.Tick();
             m_branchUnit.Tick();
             m_fetchUnit.Tick();
             m_dispatchUnit.Tick();

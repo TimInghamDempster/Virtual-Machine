@@ -1,0 +1,12 @@
+CPU
+	See Machine Language Reference
+	Maps 128 addresses, mainly for return values
+
+Bios
+
+Display
+
+Keyboard
+	Ticks every 10,000 cpu cycles
+	Maps a single address for the last key pressed
+	Any message on it's interconnect terminal returns the last key pressed to that address

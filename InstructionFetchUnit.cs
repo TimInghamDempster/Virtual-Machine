@@ -44,13 +44,14 @@ namespace Virutal_Machine
                 {
                     if(m_IOInterconnect.HasPacket)
                     {
-                        int[] recivedPacket = new int[m_IOInterconnect.RecievedSize];
-                        m_IOInterconnect.ReadRecievedPacket(recivedPacket);
+                        int[] receivedPacket = new int[m_IOInterconnect.RecievedSize];
+                        m_IOInterconnect.ReadRecievedPacket(receivedPacket);
 						
-						if(recivedPacket[m_IOInterconnect.RecievedSize - 1] == (int)ExecutionUnitCodes.Fetch)
+						if(receivedPacket[0] == (int)ExecutionUnitCodes.Fetch)
 						{
 							m_IOInterconnect.ClearRecievedPacket();
-							m_dispatchUnit.SetInstruction(recivedPacket);
+							int[] m_instruction = new int[] { receivedPacket[1], receivedPacket[2] };
+							m_dispatchUnit.SetInstruction(m_instruction);
 							m_waitingForMemory = false;
 							m_CPUCore.m_nextStage = PipelineStages.InstructionDispatch;
 						}
