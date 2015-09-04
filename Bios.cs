@@ -43,8 +43,9 @@ namespace Virutal_Machine
 										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn,							0,										// Return to execution
 
 										// Write "Hello world"
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	4 << 8	|	0,	12,										// Put string length into register 4
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	0,										// Put desired cursor pos into register 0
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	(int)m_startAddress + 28,				// Put location of start of string into register 1
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	(int)m_startAddress + 32,				// Put location of start of string into register 1
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2 << 8	|	0,	0,										// Put write character code into register 2
 										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromRegisterLocation	|	3 << 8	|	1,	0,										// Load the value from the location specified in register 1 into register 3
 										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
@@ -52,7 +53,8 @@ namespace Virutal_Machine
 										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	2,	(int)Program.displayStartAddress,		// Write character
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment string pointer
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	0 << 8	|	0,	1,										// Increment cursor position register
-										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,											(int)m_startAddress + 14,				// Loop
+										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.JumpNotEqual				|	0 << 8	|	4,	(int)m_startAddress + 16,				// Loop if not at string end
+										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Break,										0,										// Breakpoint at end of program
 										
 										// Data section
 										// "Hello world"

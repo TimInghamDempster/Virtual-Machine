@@ -71,7 +71,13 @@ namespace Virutal_Machine
             if (m_newline)
             {
                 Console.WriteLine();
-                m_newline = false;
+
+				for(int i = 0; i < m_lineLength; i++)
+				{
+					m_currentLine[i] = ' ';
+				}
+                
+				m_newline = false;
             }
 			Console.SetCursorPosition(0, Console.CursorTop);
 			Console.Write(m_currentLine);
