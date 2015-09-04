@@ -18,12 +18,12 @@ namespace Virutal_Machine
     enum ExecutionUnitCodes
     {
         Nop,
-        ALU	= 1 << 16,
-        Load		= 2 << 16,
-        Store		= 3 << 16,
-		Branch		= 4 << 16,
-		Fetch		= 5 << 16,
-		Interrupt	= 6 << 16
+        ALU			= 1 << 24,
+        Load		= 2 << 24,
+        Store		= 3 << 24,
+		Branch		= 4 << 24,
+		Fetch		= 5 << 24,
+		Interrupt	= 6 << 24
     }
 
     class CPUCore

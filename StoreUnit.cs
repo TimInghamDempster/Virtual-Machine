@@ -9,7 +9,7 @@ namespace Virutal_Machine
     enum StoreOperations
     {
         StoreToRegisterLocation,
-        StoreToLiteralLocation = 1 << 8
+        StoreToLiteralLocation = 1 <<16
     }
 
     class StoreUnit
@@ -30,14 +30,15 @@ namespace Virutal_Machine
         {
             if (m_CPUCore.m_currentStage == PipelineStages.Execution && m_hasInstruction == true)
             {
-                StoreOperations operation = (StoreOperations)(m_currentInstruction[0] & 0x0000ff00);
-                int registerWithValueToStore = m_currentInstruction[0] & 0xff;
+                StoreOperations operation = (StoreOperations)(m_currentInstruction[0] & 0x00ff0000);
+                int targetRegister = (m_currentInstruction[0] >> 8) & 0x000000ff;
+				int sourceRegister = m_currentInstruction[0] & 0x000000ff;
                 switch(operation)
                 {
                     case StoreOperations.StoreToRegisterLocation:
                         {
-                            uint address = (uint)m_CPUCore.m_registers[m_currentInstruction[1]];
-                            int value = m_CPUCore.m_registers[registerWithValueToStore];
+                            uint address = (uint)(m_CPUCore.m_registers[targetRegister] + m_currentInstruction[1]);
+                            int value = m_CPUCore.m_registers[sourceRegister];
 
                             int[] packet = new int[3];
                             packet[0] = (int)address;
@@ -55,7 +56,7 @@ namespace Virutal_Machine
                     case StoreOperations.StoreToLiteralLocation:
                         {
                             uint address = (uint)m_currentInstruction[1];
-                            int value = m_CPUCore.m_registers[registerWithValueToStore];
+                            int value = m_CPUCore.m_registers[sourceRegister];
 
                             int[] packet = new int[3];
                             packet[0] = (int)address;

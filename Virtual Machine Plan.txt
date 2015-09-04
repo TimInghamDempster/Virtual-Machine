@@ -103,8 +103,6 @@ Lesson 3 Loops and indirection
 	Delete all but first iteration of bios program
 	Add Jump to line 4 to end of bios program
 	Update data load location
-	
-	Current state of my lookahead project
 
 Lesson 4 conditionals, interrupts, and the Keyboard
 	Create keyboard class
@@ -123,6 +121,9 @@ Lesson 4 conditionals, interrupts, and the Keyboard
 			Load value from keyboard to register
 			Call interruptReturn
 		Move all the memory addresses in the old program to match new locations
+		
+		
+	Current state of my lookahead project
 			
 Lesson 5 Memory and Storage
 

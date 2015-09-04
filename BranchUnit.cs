@@ -9,7 +9,7 @@ namespace Virutal_Machine
 	enum BranchOperations
 	{
 		Nop,
-		Jump = 1 << 8
+		Jump = 1 << 16
 	}
 
 	class BranchUnit
@@ -29,7 +29,7 @@ namespace Virutal_Machine
 			{
 				if (m_hasInstruction)
 				{
-					switch ((BranchOperations)(m_currentOp[0] & 0x0000ff00))
+					switch ((BranchOperations)(m_currentOp[0] & 0x00ff0000))
 					{
 						case BranchOperations.Nop:
 							{

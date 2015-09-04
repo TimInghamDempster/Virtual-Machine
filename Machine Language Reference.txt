@@ -1,16 +1,22 @@
 Machine Language Reference
 
+Instructions are made of two uints.
+The first takes the form of four bytes:
+ExecutionUnit | InstructionNumber | TargetRegister | SourceRegister
+Not all instructions use both (or any) registers
+The second value is an argument
+
 ALUOperations
-	AddLiteral adds the number in the argument to the specified register
+	AddLiteral adds the number in the argument to the source register and stores in the target register
 	SetLiteral sets the specified register to the number in the argument
 	CopyRegister sets the specified register to the value of the register specified in the argument
 	
 StoreOperations
-	StoreToRegisterLocation stores the value in the specified register to the address in the register specified in the argument
-	StoreToLiteralLocation stores the value in the specified register to the address in the argument
+	StoreToRegisterLocation stores the value in the source register to the address computed as the target register plus the offset specified in the argument
+	StoreToLiteralLocation stores the value in the source register to the address in the argument
 	
 LoadOperations
-	LoadFromRegisterLocation loads a value from the location in the register specified in the argument into the specified register
+	LoadFromRegisterLocation loads a value from the location computed from the source register plus the offset in the argument into the target register
 
 BranchOperations
 	Jump jumps execution to the address specified in the argument

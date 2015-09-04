@@ -9,8 +9,8 @@ namespace Virutal_Machine
 	enum LoadOperations
 	{
 		Nop,
-		LoadFromRegisterLocation = 1 << 8,
-		LoadFromLiteralLocation = 2 << 8
+		LoadFromRegisterLocation = 1 << 16,
+		LoadFromLiteralLocation = 2 << 16
 	}
 
 	class LoadUnit
@@ -32,14 +32,14 @@ namespace Virutal_Machine
 		{
 			if (m_CPUCore.m_currentStage == PipelineStages.Execution && m_hasInstruction == true)
 			{
-				switch((LoadOperations)(m_currentInstruction[0] & 0x0000ff00))
+				switch((LoadOperations)(m_currentInstruction[0] & 0x00ff0000))
 				{
 					case LoadOperations.LoadFromRegisterLocation:
 					{
 						if (m_waitingForMemory == false)
 						{
 							int[] newPacket = new int[3];
-							newPacket[0] = (int)m_CPUCore.m_registers[m_currentInstruction[1]];
+							newPacket[0] = (int)m_CPUCore.m_registers[m_currentInstruction[0] & 0x000000ff] + m_currentInstruction[1];
 							newPacket[1] = 1;
 							newPacket[2] = (int)ExecutionUnitCodes.Load;
 
@@ -60,7 +60,7 @@ namespace Virutal_Machine
 							if (m_waitingForMemory == false)
 							{
 								int[] newPacket = new int[3];
-								newPacket[0] = m_currentInstruction[1];
+								newPacket[0] = (m_currentInstruction[0] & 0x000000ff) + m_currentInstruction[1];
 								newPacket[1] = 1;
 								newPacket[2] = (int)ExecutionUnitCodes.Load;
 
@@ -93,7 +93,7 @@ namespace Virutal_Machine
 					m_waitingForMemory = false;
 					m_hasInstruction = false;
 
-					m_CPUCore.m_registers[m_currentInstruction[0] & 0x000000ff] = recivedPacket[1];
+					m_CPUCore.m_registers[(m_currentInstruction[0] >> 8) & 0x000000ff] = recivedPacket[1];
 
 					m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
 				}

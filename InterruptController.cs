@@ -9,8 +9,8 @@ namespace Virutal_Machine
 	enum InterruptInstructions
 	{
 		SetInterrupt,
-		CallInterrupt = 1 << 8,
-		InterruptReturn = 2 << 8
+		CallInterrupt = 1 << 16,
+		InterruptReturn = 2 << 16
 	}
 
 	class InterruptController
@@ -28,7 +28,7 @@ namespace Virutal_Machine
 
 		public void SetInstruction(int[] instruction)
 		{
-			switch ((InterruptInstructions)(instruction[0] & 0x0000ff00))
+			switch ((InterruptInstructions)(instruction[0] & 0x00ff0000))
 			{
 				case InterruptInstructions.SetInterrupt:
 				{

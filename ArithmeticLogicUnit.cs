@@ -9,8 +9,8 @@ namespace Virutal_Machine
     enum ALUOperations
     {
         AddLiteral,
-        SetLiteral = 1 << 8,
-        CopyRegister = 2 << 8
+        SetLiteral = 1 << 16,
+        CopyRegister = 2 << 16
     }
 
     class ArithmeticLogicUnit
@@ -49,18 +49,19 @@ namespace Virutal_Machine
                 }
                 else
                 {
-                    ALUOperations instructionCode = (ALUOperations)(m_currentInstruction[0] & 0x0000ff00);
-                    int registerToOperateOn = m_currentInstruction[0] & 0xff;
+                    ALUOperations instructionCode = (ALUOperations)(m_currentInstruction[0] & 0x00ff0000);
+                    int targetRegister = (m_currentInstruction[0] & 0x0000ff00) >> 8;
+					int sourceRegister = m_currentInstruction[0] & 0x000000ff;
                     switch (instructionCode)
                     {
                         case ALUOperations.AddLiteral:
-                            m_CPUCore.m_registers[registerToOperateOn] += m_currentInstruction[1];
+							m_CPUCore.m_registers[targetRegister] = m_CPUCore.m_registers[sourceRegister] + m_currentInstruction[1];
                             break;
                         case ALUOperations.SetLiteral:
-                            m_CPUCore.m_registers[registerToOperateOn] = m_currentInstruction[1];
+							m_CPUCore.m_registers[targetRegister] = m_currentInstruction[1];
                             break;
                         case ALUOperations.CopyRegister:
-                            m_CPUCore.m_registers[registerToOperateOn] = m_CPUCore.m_registers[m_currentInstruction[1]];
+							m_CPUCore.m_registers[targetRegister] = m_CPUCore.m_registers[m_currentInstruction[1]];
                             break;
                     }
                     m_hasInstruction = false;
@@ -73,7 +74,7 @@ namespace Virutal_Machine
         {
             m_hasInstruction = true;
             m_currentInstruction = instruction;
-            m_currentInstructionTimeRemaining = m_cycleCountsPerInstruction[(ALUOperations)(instruction[0] & 0x0000ff00)] - 1;
+            m_currentInstructionTimeRemaining = m_cycleCountsPerInstruction[(ALUOperations)(instruction[0] & 0x00ff0000)] - 1;
         }
     }
 }

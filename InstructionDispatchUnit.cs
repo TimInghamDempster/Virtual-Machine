@@ -37,7 +37,7 @@ namespace Virutal_Machine
 		{
 			if (m_CPUCore.m_currentStage == PipelineStages.InstructionDispatch)
 			{
-				ExecutionUnitCodes executionUnitCode = (ExecutionUnitCodes)(m_currentInstruction[0] & 0x00ff0000);
+				ExecutionUnitCodes executionUnitCode = (ExecutionUnitCodes)(m_currentInstruction[0] & 0xff000000);
 				switch (executionUnitCode)
 				{
 					case ExecutionUnitCodes.ALU:

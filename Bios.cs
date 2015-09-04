@@ -35,24 +35,24 @@ namespace Virutal_Machine
 										// Instructions
 
 										// Set up keyboard interrupt handler
-										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.SetInterrupt			|	0,	(int)m_startAddress + 4,				// Set interrupt 0 (keyboard) to address 4
-										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,								(int)m_startAddress + 8,				// Jump to program start
+										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.SetInterrupt			|	0,				(int)m_startAddress + 4,				// Set interrupt 0 (keyboard) to address 4
+										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,											(int)m_startAddress + 8,				// Jump to program start
 
 										// Keyboard interrupt handler
-										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromLiteralLocation		|	9,	(int)Program.keyboardStartAddress,		// Copy last key pressed into register 9
-										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn,				0,										// Return to execution
+										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromLiteralLocation		|	9 << 8	|	0,	(int)Program.keyboardStartAddress,		// Copy last key pressed into register 9
+										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn,							0,										// Return to execution
 
 										// Write "Hello world"
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0,	0,										// Put desired cursor pos into register 0
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1,	(int)m_startAddress + 28,				// Put location of start of string into register 1
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2,	0,										// Put write character code into register 2
-										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromRegisterLocation	|	3,	1,										// Load the value from the location specified in register 1 into register 3
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	3,	(int)Program.displayStartAddress + 2,	// Set character
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	2,	(int)Program.displayStartAddress,		// Write character
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1,	1,										// Increment string pointer
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	0,	1,										// Increment cursor position register
-										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,								(int)m_startAddress + 14,				// Loop
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	0,										// Put desired cursor pos into register 0
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	(int)m_startAddress + 28,				// Put location of start of string into register 1
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2 << 8	|	0,	0,										// Put write character code into register 2
+										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromRegisterLocation	|	3 << 8	|	1,	0,										// Load the value from the location specified in register 1 into register 3
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	3,	(int)Program.displayStartAddress + 2,	// Set character
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	2,	(int)Program.displayStartAddress,		// Write character
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment string pointer
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	0 << 8	|	0,	1,										// Increment cursor position register
+										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,											(int)m_startAddress + 14,				// Loop
 										
 										// Data section
 										// "Hello world"

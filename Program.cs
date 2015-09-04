@@ -31,10 +31,21 @@ namespace Virutal_Machine
         public const uint displayStartAddress = biosStartAddress + 1024;
 		public const uint keyboardStartAddress = displayStartAddress + 4;
 
+		static List<InterconnectTerminal> m_interconnects = new List<InterconnectTerminal>();
+
         static uint tickCount;
 
         static void Main(string[] args)
         {
+			m_interconnects.Add(m_CPU_PCH_Interconnect);
+			m_interconnects.Add(m_PCH_CPU_Interconnect);
+			m_interconnects.Add(m_PCH_BIOS_Interconnect);
+			m_interconnects.Add(m_BIOS_PCH_Interconnect);
+			m_interconnects.Add(m_PCH_Display_Interconnect);
+			m_interconnects.Add(m_Display_PCH_Interconnect);
+			m_interconnects.Add(m_PCH_Keyboard_Interconnect);
+			m_interconnects.Add(m_Keyboard_PCH_Interconnect);
+
             m_CPU_PCH_Interconnect.SetOtherEnd(m_PCH_CPU_Interconnect);
             m_PCH_BIOS_Interconnect.SetOtherEnd(m_BIOS_PCH_Interconnect);
             m_PCH_Display_Interconnect.SetOtherEnd(m_Display_PCH_Interconnect);
@@ -67,14 +78,10 @@ namespace Virutal_Machine
 					m_keyboard.Tick();
 				}
 
-                m_CPU_PCH_Interconnect.Tick();
-                m_PCH_CPU_Interconnect.Tick();
-                m_PCH_BIOS_Interconnect.Tick();
-                m_BIOS_PCH_Interconnect.Tick();
-                m_PCH_Display_Interconnect.Tick();
-                m_Display_PCH_Interconnect.Tick();
-				m_Keyboard_PCH_Interconnect.Tick();
-				m_PCH_Keyboard_Interconnect.Tick();
+                foreach(InterconnectTerminal interconnect in m_interconnects)
+				{
+					interconnect.Tick();
+				}
             }
         }
     }
