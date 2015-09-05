@@ -45,7 +45,7 @@ namespace Virutal_Machine
 										// Write "Hello world"
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	4 << 8	|	0,	12,										// Put string length into register 4
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	0,										// Put desired cursor pos into register 0
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	(int)m_startAddress + 32,				// Put location of start of string into register 1
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	(int)m_startAddress + 34,				// Put location of start of string into register 1
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2 << 8	|	0,	0,										// Put write character code into register 2
 										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromRegisterLocation	|	3 << 8	|	1,	0,										// Load the value from the location specified in register 1 into register 3
 										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
@@ -54,7 +54,8 @@ namespace Virutal_Machine
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment string pointer
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	0 << 8	|	0,	1,										// Increment cursor position register
 										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.JumpNotEqual				|	0 << 8	|	4,	(int)m_startAddress + 16,				// Loop if not at string end
-										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Break,										0,										// Breakpoint at end of program
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	(int)DisplayCommands.Newline,			// Set register 0 to "newline" command
+										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayStartAddress,		// Send newline command to display
 										
 										// Data section
 										// "Hello world"

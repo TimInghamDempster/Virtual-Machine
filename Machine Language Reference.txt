@@ -20,6 +20,8 @@ LoadOperations
 
 BranchOperations
 	Jump jumps execution to the address specified in the argument
+	JumpNotEqual jumps execution to the address specified in the argument if the value of the source register is not equal to the value of the destination register
+	Break triggers a breakpoint
 	
 InterruptController
 	SetInterrupt sets the pointer for the interrupt specified in the instruction to the pointer specified in the argument

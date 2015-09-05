@@ -33,6 +33,8 @@ namespace Virutal_Machine
         
         public int[] m_registers;
 
+		uint m_coreId;
+
         public PipelineStages m_currentStage;
         public PipelineStages m_nextStage;
 
@@ -49,8 +51,9 @@ namespace Virutal_Machine
 
 
 
-        public CPUCore(InterconnectTerminal IOInterconnect)
+        public CPUCore(InterconnectTerminal IOInterconnect, uint id)
 		{
+			m_coreId = id;
 			m_interruptController = new InterruptController(this);
             m_instructionPointer = Program.biosStartAddress;
             m_registers = new int[10];
