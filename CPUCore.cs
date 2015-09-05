@@ -47,15 +47,15 @@ namespace Virutal_Machine
         LoadUnit m_loadUnit;
         StoreUnit m_storeUnit;
         RetireUnit m_retireUnit;
-		public InterruptController m_interruptController;
+		private InterruptController m_interruptController;
 
 
 
-        public CPUCore(InterconnectTerminal IOInterconnect, uint id)
+        public CPUCore(InterconnectTerminal IOInterconnect, uint id, InterruptController interruptController)
 		{
 			m_coreId = id;
-			m_interruptController = new InterruptController(this);
             m_instructionPointer = Program.biosStartAddress;
+			this.m_interruptController = interruptController;
             m_registers = new int[10];
             m_currentStage = PipelineStages.InstructionFetch;
             m_nextStage = PipelineStages.InstructionFetch;
@@ -66,13 +66,12 @@ namespace Virutal_Machine
             m_loadUnit = new LoadUnit(this, m_IOInterconnect);
             m_storeUnit = new StoreUnit(this, IOInterconnect);
             m_branchUnit = new BranchUnit(this);
-            m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit);
+            m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit, m_interruptController);
             m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit);
         }
 
         public void Tick()
         {
-			m_interruptController.Tick();
             m_branchUnit.Tick();
             m_fetchUnit.Tick();
             m_dispatchUnit.Tick();

@@ -8,26 +8,27 @@ namespace Virutal_Machine
 {
     class CPU
     {
-        public CPUCore[] m_cores;
-        public Clock m_clock;
+        CPUCore[] m_cores;
+        Clock m_clock;
 		const uint NumCores = 1;
-
-        MemeoryController m_memoryController;
-
+		
         InterconnectTerminal m_IOInterconnect;
 		List<InterconnectTerminal> m_coreUncoreInterconnects;
 		Uncore m_uncore;
+		InterruptController m_interruptController;
+
+		public InterruptController LocalPIC { get { return m_interruptController; } }
 
         public CPU(InterconnectTerminal IOInterconnect)
         {
             m_clock = new Clock();
 
             m_IOInterconnect = IOInterconnect;
-            m_memoryController = new MemeoryController();
 
 			m_coreUncoreInterconnects = new List<InterconnectTerminal>();
 
 			m_uncore = new Uncore(m_IOInterconnect);
+			m_interruptController = new InterruptController();
 
             m_cores = new CPUCore[NumCores];
 
@@ -41,7 +42,9 @@ namespace Virutal_Machine
 				m_coreUncoreInterconnects.Add(uncoreCore);
 
 				m_uncore.AddCoreInterconnect(uncoreCore);
-				m_cores[i] = new CPUCore(coreUncore, i);
+				m_cores[i] = new CPUCore(coreUncore, i, m_interruptController);
+
+				m_interruptController.AddCore(m_cores[i]);
 			}
         }
         
@@ -50,6 +53,7 @@ namespace Virutal_Machine
             m_cores[0].Tick();
             m_clock.Tick();
 			m_uncore.Tick();
+			m_interruptController.Tick();
 
 			foreach(InterconnectTerminal ic in m_coreUncoreInterconnects)
 			{

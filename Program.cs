@@ -55,7 +55,7 @@ namespace Virutal_Machine
 
             m_bios = new Bios(biosStartAddress, m_BIOS_PCH_Interconnect);
             m_display = new Display(displayStartAddress, m_Display_PCH_Interconnect);
-			m_keyboard = new VMKeyboard(m_cpu.m_cores[0].m_interruptController, m_Keyboard_PCH_Interconnect);
+			m_keyboard = new VMKeyboard(m_cpu.LocalPIC, m_Keyboard_PCH_Interconnect);
 
             m_PCH = new PlatformControlHub(m_PCH_CPU_Interconnect, PCHStartAddress);
 
