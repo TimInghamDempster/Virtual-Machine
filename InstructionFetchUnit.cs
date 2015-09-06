@@ -30,8 +30,8 @@ namespace Virutal_Machine
                 {
                     int[] newPacket = new int[3];
                     newPacket[0] = (int)m_CPUCore.InstructionPointer;
-                    newPacket[1] = 2;
-					newPacket[2] = (int)ExecutionUnitCodes.Fetch;
+					newPacket[1] = (int)ExecutionUnitCodes.Fetch;
+					newPacket[2] = 2;
                     
 					bool requestSent = m_IOInterconnect.SendPacket(newPacket, 3);
 

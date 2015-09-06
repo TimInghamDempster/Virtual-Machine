@@ -95,7 +95,7 @@ namespace Virutal_Machine
 				m_systenInterconnect.ClearRecievedPacket();
 
 				uint localAddress = (uint)packet[0] - m_startAddress;
-				int readLength = packet[1];
+				int readLength = packet[2];
 
 				m_sending = true;
 				m_sendData = new int[readLength + 1];
@@ -108,7 +108,7 @@ namespace Virutal_Machine
 					}
 				}
 
-				m_sendData[0] = packet[2];
+				m_sendData[0] = packet[1];
 				m_sendCountdown = CyclesPerAccess;
 			}
 

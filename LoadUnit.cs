@@ -42,8 +42,8 @@ namespace Virutal_Machine
 						{
 							int[] newPacket = new int[3];
 							newPacket[0] = m_registers[m_currentInstruction[0] & 0x000000ff] + m_currentInstruction[1];
-							newPacket[1] = 1;
-							newPacket[2] = (int)ExecutionUnitCodes.Load;
+							newPacket[1] = (int)ExecutionUnitCodes.Load;
+							newPacket[2] = 1;
 
 							bool requestSent = m_IOInterconnect.SendPacket(newPacket, 3);
 
