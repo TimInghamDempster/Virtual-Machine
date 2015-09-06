@@ -72,9 +72,10 @@ namespace Virutal_Machine
                 m_PCH.Tick();
                 m_bios.Tick();
 
-				if(tickCount % 5000 == 0)
+				m_display.Tick();
+
+				if(tickCount % 100000 == 0)
 				{
-					m_display.Tick();
 					m_keyboard.Tick();
 				}
 

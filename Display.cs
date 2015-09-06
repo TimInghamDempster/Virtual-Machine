@@ -24,6 +24,8 @@ namespace Virutal_Machine
         int m_cursorPos;
         char m_currentChar;
 
+		int m_tickCount;
+
         public Display(uint startAddress, InterconnectTerminal systemInterconnect)
         {
             m_startAddress = startAddress;
@@ -68,20 +70,28 @@ namespace Virutal_Machine
                 }
             }
 
-            if (m_newline)
-            {
-                Console.WriteLine();
+           
 
-				for(int i = 0; i < m_lineLength; i++)
+			m_tickCount++;
+
+			if((m_tickCount % 100000) == 0)
+			{
+				Console.SetCursorPosition(0, Console.CursorTop);
+				Console.Write(m_currentLine);
+				Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+
+				if (m_newline)
 				{
-					m_currentLine[i] = ' ';
+					Console.WriteLine();
+
+					for (int i = 0; i < m_lineLength; i++)
+					{
+						m_currentLine[i] = ' ';
+					}
+
+					m_newline = false;
 				}
-                
-				m_newline = false;
-            }
-			Console.SetCursorPosition(0, Console.CursorTop);
-			Console.Write(m_currentLine);
-			Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);     
+			}
         }
     }
 }
