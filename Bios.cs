@@ -35,15 +35,15 @@ namespace Virutal_Machine
 										// Instructions
 
 										// Set up keyboard interrupt handler
-										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.SetInterrupt			|	0,				(int)m_startAddress + 4,				// Set interrupt 0 (keyboard) to address 4
-										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump,											(int)m_startAddress + 8,				// Jump to program start
+										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.SetInterrupt			|	0 << 8	|	0,	(int)m_startAddress + 4,				// Set interrupt 0 (keyboard) to address 4
+										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump						|	0 << 8	|	0,	(int)m_startAddress + 8,				// Jump to program start
 
 										// Keyboard interrupt handler
 										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromLiteralLocation		|	9 << 8	|	0,	(int)Program.keyboardStartAddress,		// Copy last key pressed into register 9
-										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn,							0,										// Return to execution
+										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn		|	0 << 8	|	0,	0,										// Return to execution
 
 										// Write "Hello world"
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	4 << 8	|	0,	12,										// Put string length into register 4
+										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	4 << 8	|	0,	24,										// Put string length into register 4
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	0,										// Put desired cursor pos into register 0
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	(int)m_startAddress + 34,				// Put location of start of string into register 1
 										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2 << 8	|	0,	0,										// Put write character code into register 2
@@ -58,18 +58,31 @@ namespace Virutal_Machine
 										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayStartAddress,		// Send newline command to display
 										
 										// Data section
-										// "Hello world"
+										// "hello what's your name?"
 										0x00000068,
 										0x00000065,
 										0x0000006c,
 										0x0000006c,
 										0x0000006f,
+										0x0000002c,
 										0x00000020,
 										0x00000077,
+										0x00000068,
+										0x00000061,
+										0x00000074,
+										0x00000027,
+										0x00000073,
+										0x00000020,
+										0x00000079,
 										0x0000006f,
+										0x00000075,
 										0x00000072,
-										0x0000006c,
-										0x00000064,
+										0x00000020,
+										0x0000006e,
+										0x00000061,
+										0x0000006d,
+										0x00000065,
+										0x0000003f,
 			};
 		}
 
