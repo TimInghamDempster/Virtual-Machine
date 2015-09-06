@@ -16,6 +16,7 @@ namespace Virutal_Machine
 	class InterruptController
 	{
 		private List<CPUCore> m_CPUCores;
+		List<Action<uint>> m_setIPList;
 		public List<uint> m_interruptVector;
 		private uint m_interruptNumber;
 		private bool m_interrupt;
@@ -23,12 +24,14 @@ namespace Virutal_Machine
 		public InterruptController()
 		{
 			m_CPUCores = new List<CPUCore>();
+			m_setIPList = new List<Action<uint>>();
 			m_interruptVector = new List<uint>();
 		}
 
-		public void AddCore(CPUCore core)
+		public void AddCore(CPUCore core, Action<uint> setInstructionPointer)
 		{
 			m_CPUCores.Add(core);
+			m_setIPList.Add(setInstructionPointer);
 		}
 
 		public void SetInstruction(int[] instruction)
@@ -46,7 +49,7 @@ namespace Virutal_Machine
 				}break;
 				case InterruptInstructions.InterruptReturn:
 				{
-					m_CPUCores[0].m_instructionPointer = m_CPUCores[0].m_storedIPointer;
+					m_setIPList[0](m_CPUCores[0].m_storedIPointer);
 				}break;
 			}
 		}
@@ -61,12 +64,12 @@ namespace Virutal_Machine
 		{
 			// We tick before everything else so safe to jump in first.  Will be a minefield
 			// when pipelining.
-			if(m_CPUCores[0].m_currentStage == PipelineStages.InstructionFetch)
+			if(m_CPUCores[0].CurrentStage == PipelineStages.InstructionFetch)
 			{
 				if (m_interrupt && m_interruptNumber < m_interruptVector.Count)
 				{
-					m_CPUCores[0].m_storedIPointer = m_CPUCores[0].m_instructionPointer;
-					m_CPUCores[0].m_instructionPointer = m_interruptVector[(int)m_interruptNumber];
+					m_CPUCores[0].m_storedIPointer = m_CPUCores[0].InstructionPointer;
+					m_setIPList[0](m_interruptVector[(int)m_interruptNumber]);
 					m_interrupt = false;
 				}
 			}

@@ -28,15 +28,15 @@ namespace Virutal_Machine
 
     class CPUCore
     {
-        public uint m_instructionPointer;
+        uint m_instructionPointer;
 		public uint m_storedIPointer;
         
-        public int[] m_registers;
+        int[] m_registers;
 
 		uint m_coreId;
 
-        public PipelineStages m_currentStage;
-        public PipelineStages m_nextStage;
+        PipelineStages m_currentStage;
+        PipelineStages m_nextStage;
 
         InterconnectTerminal m_IOInterconnect;
         BranchUnit m_branchUnit;
@@ -49,6 +49,10 @@ namespace Virutal_Machine
         RetireUnit m_retireUnit;
 		private InterruptController m_interruptController;
 
+		public PipelineStages CurrentStage { get { return m_currentStage; } }
+		public PipelineStages NextStage { set { m_nextStage = value; } }
+		public uint InstructionPointer { get { return m_instructionPointer; } }
+
 
 
         public CPUCore(InterconnectTerminal IOInterconnect, uint id, InterruptController interruptController)
@@ -56,16 +60,17 @@ namespace Virutal_Machine
 			m_coreId = id;
             m_instructionPointer = Program.biosStartAddress;
 			this.m_interruptController = interruptController;
+			interruptController.AddCore(this, (uint ip) => m_instructionPointer = ip);
             m_registers = new int[10];
             m_currentStage = PipelineStages.InstructionFetch;
             m_nextStage = PipelineStages.InstructionFetch;
             m_IOInterconnect = IOInterconnect;
             m_retireUnit = new RetireUnit(this);
-            m_simpleALU = new ArithmeticLogicUnit(false, this);
-            m_complexALU = new ArithmeticLogicUnit(true, this);
-            m_loadUnit = new LoadUnit(this, m_IOInterconnect);
-            m_storeUnit = new StoreUnit(this, IOInterconnect);
-            m_branchUnit = new BranchUnit(this);
+            m_simpleALU = new ArithmeticLogicUnit(false, this, m_registers);
+            m_complexALU = new ArithmeticLogicUnit(true, this, m_registers);
+            m_loadUnit = new LoadUnit(this, m_IOInterconnect, m_registers);
+            m_storeUnit = new StoreUnit(this, IOInterconnect, m_registers);
+            m_branchUnit = new BranchUnit(this, m_registers, (uint ip) => m_instructionPointer = ip );
             m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit, m_interruptController);
             m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit);
         }

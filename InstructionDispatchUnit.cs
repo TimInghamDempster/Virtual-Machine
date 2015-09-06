@@ -38,7 +38,7 @@ namespace Virutal_Machine
 
 		public void Tick()
 		{
-			if (m_CPUCore.m_currentStage == PipelineStages.InstructionDispatch)
+			if (m_CPUCore.CurrentStage == PipelineStages.InstructionDispatch)
 			{
 				ExecutionUnitCodes executionUnitCode = (ExecutionUnitCodes)(m_currentInstruction[0] & 0xff000000);
 				switch (executionUnitCode)
@@ -46,33 +46,33 @@ namespace Virutal_Machine
 					case ExecutionUnitCodes.ALU:
 						{
 							m_simpleALU.SetInstruction(m_currentInstruction);
-							m_CPUCore.m_nextStage = PipelineStages.Execution;
+							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
 					case ExecutionUnitCodes.Load:
 						{
 							m_loadUnit.SetInstruction(m_currentInstruction);
-							m_CPUCore.m_nextStage = PipelineStages.Execution;
+							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
 					case ExecutionUnitCodes.Store:
 						{
 							m_storeUnit.SetInstruction(m_currentInstruction);
-							m_CPUCore.m_nextStage = PipelineStages.Execution;
+							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
 					case ExecutionUnitCodes.Branch:
 						{
 							m_branchUnit.SetInstruction(m_currentInstruction);
-							m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+							m_CPUCore.NextStage = PipelineStages.BranchPredict;
 						} break;
 					case ExecutionUnitCodes.Interrupt:
 						{
 							m_interruptController.SetInstruction(m_currentInstruction);
-							m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+							m_CPUCore.NextStage = PipelineStages.BranchPredict;
 						}break;
 					case ExecutionUnitCodes.Nop:
 						{
 							// Do we want to fetch here or move the isntruction pointer?
 							// Almost certainly in an invalid state anyway so no correct answer.
-							m_CPUCore.m_nextStage = PipelineStages.InstructionFetch;
+							m_CPUCore.NextStage = PipelineStages.InstructionFetch;
 						}break;
 				}
 			}

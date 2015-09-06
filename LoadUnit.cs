@@ -21,16 +21,18 @@ namespace Virutal_Machine
 		int[] m_currentInstruction;
 		bool m_hasInstruction;
 		bool m_waitingForMemory;
+		int[] m_registers;
 
-		public LoadUnit(CPUCore cPUCore, InterconnectTerminal IOInterconnect)
+		public LoadUnit(CPUCore cPUCore, InterconnectTerminal IOInterconnect, int[] registers)
 		{
 			m_CPUCore = cPUCore;
 			m_IOInterconnect = IOInterconnect;
+			m_registers = registers;
 		}
 
 		public void Tick()
 		{
-			if (m_CPUCore.m_currentStage == PipelineStages.Execution && m_hasInstruction == true)
+			if (m_CPUCore.CurrentStage == PipelineStages.Execution && m_hasInstruction == true)
 			{
 				switch((LoadOperations)(m_currentInstruction[0] & 0x00ff0000))
 				{
@@ -39,7 +41,7 @@ namespace Virutal_Machine
 						if (m_waitingForMemory == false)
 						{
 							int[] newPacket = new int[3];
-							newPacket[0] = (int)m_CPUCore.m_registers[m_currentInstruction[0] & 0x000000ff] + m_currentInstruction[1];
+							newPacket[0] = m_registers[m_currentInstruction[0] & 0x000000ff] + m_currentInstruction[1];
 							newPacket[1] = 1;
 							newPacket[2] = (int)ExecutionUnitCodes.Load;
 
@@ -93,9 +95,9 @@ namespace Virutal_Machine
 					m_waitingForMemory = false;
 					m_hasInstruction = false;
 
-					m_CPUCore.m_registers[(m_currentInstruction[0] >> 8) & 0x000000ff] = recivedPacket[1];
+					m_registers[(m_currentInstruction[0] >> 8) & 0x000000ff] = recivedPacket[1];
 
-					m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+					m_CPUCore.NextStage = PipelineStages.BranchPredict;
 				}
 			}
 		}

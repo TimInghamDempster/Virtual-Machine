@@ -18,16 +18,20 @@ namespace Virutal_Machine
 	{
 		CPUCore m_CPUCore;
 		int[] m_currentOp;
+		int[] m_registers;
+		Action<uint> SetInstructionPointer;
 		bool m_hasInstruction;
 
-		public BranchUnit(CPUCore cPUCore)
+		public BranchUnit(CPUCore cPUCore, int[] registers, Action<uint> setInstructionPointer)
 		{
 			m_CPUCore = cPUCore;
+			m_registers = registers;
+			SetInstructionPointer = setInstructionPointer;
 		}
 
 		public void Tick()
 		{
-			if (m_CPUCore.m_currentStage == PipelineStages.BranchPredict)
+			if (m_CPUCore.CurrentStage == PipelineStages.BranchPredict)
 			{
 				if (m_hasInstruction)
 				{
@@ -35,11 +39,11 @@ namespace Virutal_Machine
 					{
 						case BranchOperations.Nop:
 							{
-								m_CPUCore.m_instructionPointer += 2;
+								SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
 							} break;
 						case BranchOperations.Jump:
 							{
-								m_CPUCore.m_instructionPointer = (uint)m_currentOp[1];
+								SetInstructionPointer((uint)m_currentOp[1]);
 								m_hasInstruction = false;
 							} break;
 						case BranchOperations.JumpNotEqual:
@@ -47,29 +51,29 @@ namespace Virutal_Machine
 								int register1 = (m_currentOp[0] >> 8) & 0x000000ff;
 								int register2 = m_currentOp[0] & 0x000000ff;
 
-								if(m_CPUCore.m_registers[register1] == m_CPUCore.m_registers[register2])
+								if(m_registers[register1] == m_registers[register2])
 								{
-									m_CPUCore.m_instructionPointer += 2;
+									SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
 								}
 								else
 								{
-									m_CPUCore.m_instructionPointer = (uint)m_currentOp[1];
+									SetInstructionPointer((uint)m_currentOp[1]);
 								}
 								m_hasInstruction = false;
 							}break;
 						case BranchOperations.Break:
 							{
 								System.Diagnostics.Debugger.Break();
-								m_CPUCore.m_instructionPointer += 2;
+								SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
 								m_hasInstruction = false;
 							}break;
 					}
 				}
 				else
 				{
-					m_CPUCore.m_instructionPointer += 2;
+					SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
 				}
-				m_CPUCore.m_nextStage = PipelineStages.InstructionFetch;
+				m_CPUCore.NextStage = PipelineStages.InstructionFetch;
 			}
 		}
 

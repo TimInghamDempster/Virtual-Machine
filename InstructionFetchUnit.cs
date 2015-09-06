@@ -24,12 +24,12 @@ namespace Virutal_Machine
 
         public void Tick()
         {
-            if (m_CPUCore.m_currentStage == PipelineStages.InstructionFetch)
+            if (m_CPUCore.CurrentStage == PipelineStages.InstructionFetch)
             {                
                 if (m_waitingForMemory == false)
                 {
                     int[] newPacket = new int[3];
-                    newPacket[0] = (int)m_CPUCore.m_instructionPointer;
+                    newPacket[0] = (int)m_CPUCore.InstructionPointer;
                     newPacket[1] = 2;
 					newPacket[2] = (int)ExecutionUnitCodes.Fetch;
                     
@@ -53,7 +53,7 @@ namespace Virutal_Machine
 							int[] m_instruction = new int[] { receivedPacket[1], receivedPacket[2] };
 							m_dispatchUnit.SetInstruction(m_instruction);
 							m_waitingForMemory = false;
-							m_CPUCore.m_nextStage = PipelineStages.InstructionDispatch;
+							m_CPUCore.NextStage = PipelineStages.InstructionDispatch;
 						}
                     }
                 }

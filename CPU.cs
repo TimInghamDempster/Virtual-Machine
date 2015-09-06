@@ -43,8 +43,6 @@ namespace Virutal_Machine
 
 				m_uncore.AddCoreInterconnect(uncoreCore);
 				m_cores[i] = new CPUCore(coreUncore, i, m_interruptController);
-
-				m_interruptController.AddCore(m_cores[i]);
 			}
         }
         

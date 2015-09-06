@@ -19,16 +19,18 @@ namespace Virutal_Machine
 
         int[] m_currentInstruction;
         bool m_hasInstruction;
+		int[] m_registers;
 
-        public StoreUnit(CPUCore cPUCore, InterconnectTerminal IOInterconenct)
+        public StoreUnit(CPUCore cPUCore, InterconnectTerminal IOInterconenct, int[] registers)
         {
             m_CPUCore = cPUCore;
             m_ioInterconnect = IOInterconenct;
+			m_registers = registers;
         }
 
         public void Tick()
         {
-            if (m_CPUCore.m_currentStage == PipelineStages.Execution && m_hasInstruction == true)
+            if (m_CPUCore.CurrentStage == PipelineStages.Execution && m_hasInstruction == true)
             {
                 StoreOperations operation = (StoreOperations)(m_currentInstruction[0] & 0x00ff0000);
                 int targetRegister = (m_currentInstruction[0] >> 8) & 0x000000ff;
@@ -37,8 +39,8 @@ namespace Virutal_Machine
                 {
                     case StoreOperations.StoreToRegisterLocation:
                         {
-                            uint address = (uint)(m_CPUCore.m_registers[targetRegister] + m_currentInstruction[1]);
-                            int value = m_CPUCore.m_registers[sourceRegister];
+                            uint address = (uint)(m_registers[targetRegister] + m_currentInstruction[1]);
+                            int value = m_registers[sourceRegister];
 
                             int[] packet = new int[3];
                             packet[0] = (int)address;
@@ -49,14 +51,14 @@ namespace Virutal_Machine
                             if (stored)
                             {
 								m_hasInstruction = false;
-                                m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+                                m_CPUCore.NextStage = PipelineStages.BranchPredict;
                             }
                         }
                         break;
                     case StoreOperations.StoreToLiteralLocation:
                         {
                             uint address = (uint)m_currentInstruction[1];
-                            int value = m_CPUCore.m_registers[sourceRegister];
+                            int value = m_registers[sourceRegister];
 
                             int[] packet = new int[3];
                             packet[0] = (int)address;
@@ -67,7 +69,7 @@ namespace Virutal_Machine
                             if (stored)
                             {
 								m_hasInstruction = false;
-                                m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+                                m_CPUCore.NextStage = PipelineStages.BranchPredict;
                             }
                         }
                         break;

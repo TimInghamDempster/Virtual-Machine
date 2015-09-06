@@ -20,14 +20,16 @@ namespace Virutal_Machine
         Dictionary<ALUOperations, uint> m_cycleCountsPerInstruction;
 
         int[] m_currentInstruction;
+		int[] m_registers;
         bool m_hasInstruction;
         uint m_currentInstructionTimeRemaining;
 
-        public ArithmeticLogicUnit(bool complex, CPUCore cPUCore)
+        public ArithmeticLogicUnit(bool complex, CPUCore cPUCore, int[] registers)
         {
             m_complex = complex;
             m_CPUCore = cPUCore;
             SetupCycleCounts();
+			m_registers = registers;
         }
 
         private void SetupCycleCounts()
@@ -41,7 +43,7 @@ namespace Virutal_Machine
 
         public void Tick()
         {
-            if (m_CPUCore.m_currentStage == PipelineStages.Execution && m_hasInstruction == true)
+            if (m_CPUCore.CurrentStage == PipelineStages.Execution && m_hasInstruction == true)
             {
                 if (m_currentInstructionTimeRemaining > 0)
                 {
@@ -55,17 +57,17 @@ namespace Virutal_Machine
                     switch (instructionCode)
                     {
                         case ALUOperations.AddLiteral:
-							m_CPUCore.m_registers[targetRegister] = m_CPUCore.m_registers[sourceRegister] + m_currentInstruction[1];
+							m_registers[targetRegister] = m_registers[sourceRegister] + m_currentInstruction[1];
                             break;
                         case ALUOperations.SetLiteral:
-							m_CPUCore.m_registers[targetRegister] = m_currentInstruction[1];
+							m_registers[targetRegister] = m_currentInstruction[1];
                             break;
                         case ALUOperations.CopyRegister:
-							m_CPUCore.m_registers[targetRegister] = m_CPUCore.m_registers[m_currentInstruction[1]];
+							m_registers[targetRegister] = m_registers[m_currentInstruction[1]];
                             break;
                     }
                     m_hasInstruction = false;
-                    m_CPUCore.m_nextStage = PipelineStages.BranchPredict;
+                    m_CPUCore.NextStage = PipelineStages.BranchPredict;
                 }
             }
         }
