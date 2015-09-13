@@ -1,7 +1,13 @@
 CPU
 	See Machine Language Reference
 	Maps 128 addresses, mainly for return values
-
+	
+InterruptController
+	Accepts two int messages
+	Maps four registers
+	Messages sent to 0 are two ints and raise or drop the interrupt in the second int
+	Meesages sent to 1 are three ints and set the interrupt in the second int to point to the instruction in the third.
+	2 is the register holding the last raised interrupt
 Bios
 
 Display

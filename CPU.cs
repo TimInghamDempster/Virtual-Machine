@@ -16,8 +16,8 @@ namespace Virutal_Machine
 		List<InterconnectTerminal> m_coreUncoreInterconnects;
 		Uncore m_uncore;
 		InterruptController m_interruptController;
-
-		public InterruptController LocalPIC { get { return m_interruptController; } }
+		InterconnectTerminal m_PICUncoreInterconnect;
+		InterconnectTerminal m_uncorePICInterconenct;
 
         public CPU(InterconnectTerminal IOInterconnect)
         {
@@ -27,8 +27,12 @@ namespace Virutal_Machine
 
 			m_coreUncoreInterconnects = new List<InterconnectTerminal>();
 
-			m_uncore = new Uncore(m_IOInterconnect);
-			m_interruptController = new InterruptController();
+			m_PICUncoreInterconnect = new InterconnectTerminal(1,10);
+			m_uncorePICInterconenct = new InterconnectTerminal(1,10);
+			m_PICUncoreInterconnect.SetOtherEnd(m_uncorePICInterconenct);
+
+			m_uncore = new Uncore(m_IOInterconnect, m_uncorePICInterconenct);
+			m_interruptController = new InterruptController(m_PICUncoreInterconnect);
 
             m_cores = new CPUCore[NumCores];
 
@@ -52,6 +56,9 @@ namespace Virutal_Machine
             m_clock.Tick();
 			m_uncore.Tick();
 			m_interruptController.Tick();
+
+			m_uncorePICInterconenct.Tick();
+			m_PICUncoreInterconnect.Tick();
 
 			foreach(InterconnectTerminal ic in m_coreUncoreInterconnects)
 			{

@@ -15,62 +15,63 @@ namespace Virutal_Machine
 
 	class InterruptController
 	{
-		private List<CPUCore> m_CPUCores;
-		List<Action<uint>> m_setIPList;
-		public List<uint> m_interruptVector;
-		private uint m_interruptNumber;
-		private bool m_interrupt;
+		List<Action> m_raiseInterruptList;
+		public uint[] m_interruptVector = new uint[257];
+		InterconnectTerminal m_systemTerminal;
 
-		public InterruptController()
+		const int m_startAddress = 0;
+		public const int InterruptRegisterAddress = 256;
+
+		bool m_sending;
+		int[] m_sendData;
+
+		public InterruptController(InterconnectTerminal systemTerminal)
 		{
-			m_CPUCores = new List<CPUCore>();
-			m_setIPList = new List<Action<uint>>();
-			m_interruptVector = new List<uint>();
+			m_raiseInterruptList = new List<Action>();
+			m_systemTerminal = systemTerminal;
 		}
 
-		public void AddCore(CPUCore core, Action<uint> setInstructionPointer)
+		public void AddCore(Action raiseInterrupt)
 		{
-			m_CPUCores.Add(core);
-			m_setIPList.Add(setInstructionPointer);
-		}
-
-		public void SetInstruction(int[] instruction)
-		{
-			switch ((InterruptInstructions)(instruction[0] & 0x00ff0000))
-			{
-				case InterruptInstructions.SetInterrupt:
-				{
-					uint interruptNumber = (uint)instruction[0] & 0xff;
-					while(m_interruptVector.Count <= interruptNumber)
-					{
-						m_interruptVector.Add(0);
-					}
-					m_interruptVector[(int)interruptNumber] = (uint)instruction[1];
-				}break;
-				case InterruptInstructions.InterruptReturn:
-				{
-					m_setIPList[0](m_CPUCores[0].m_storedIPointer);
-				}break;
-			}
-		}
-
-		public void Interrupt(uint interruptNumber)
-		{
-			m_interrupt = true;
-			m_interruptNumber = interruptNumber;
+			m_raiseInterruptList.Add(raiseInterrupt);
 		}
 
 		internal void Tick()
 		{
-			// We tick before everything else so safe to jump in first.  Will be a minefield
-			// when pipelining.
-			if(m_CPUCores[0].CurrentStage == PipelineStages.InstructionFetch)
+			if(m_systemTerminal.HasPacket)
 			{
-				if (m_interrupt && m_interruptNumber < m_interruptVector.Count)
+				int[] packet = new int[m_systemTerminal.RecievedSize];
+				m_systemTerminal.ReadRecievedPacket(packet);
+				m_systemTerminal.ClearRecievedPacket();
+
+				if(packet[0] == (int)MessageType.Interrupt)
 				{
-					m_CPUCores[0].m_storedIPointer = m_CPUCores[0].InstructionPointer;
-					m_setIPList[0](m_interruptVector[(int)m_interruptNumber]);
-					m_interrupt = false;
+					m_interruptVector[InterruptRegisterAddress] = (uint)packet[1];
+					m_raiseInterruptList[0]();
+				}
+				else if(packet[0] == (int)MessageType.Write)
+				{
+					int register = packet[1] - m_startAddress;
+					m_interruptVector[register] = (uint)packet[2];
+				}
+				else if(packet[0] == (int)MessageType.Read && !m_sending)
+				{
+					int register = packet[1] - m_startAddress;
+
+					m_sending = true;
+					m_sendData = new int[2];
+
+					m_sendData[0] = (int)MessageType.Response;
+					m_sendData[1] = (int)m_interruptVector[register];
+				}
+			}
+
+			if(m_sending)
+			{
+				bool sent = m_systemTerminal.SendPacket(m_sendData, m_sendData.Count());
+				if (sent)
+				{
+					m_sending = false;
 				}
 			}
 		}

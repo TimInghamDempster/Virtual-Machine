@@ -35,7 +35,7 @@ namespace Virutal_Machine
                 int[] packet = new int[m_cpuTerminal.RecievedSize];
                 m_cpuTerminal.ReadRecievedPacket(packet);
 
-                uint destAddress = (uint)packet[0];
+                uint destAddress = (uint)packet[1];
                 if (destAddress > m_deviceAddresses[m_deviceAddresses.Count - 1])
                 {
                     m_cpuTerminal.ClearRecievedPacket();

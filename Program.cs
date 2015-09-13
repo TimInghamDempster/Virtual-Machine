@@ -26,10 +26,12 @@ namespace Virutal_Machine
 		static InterconnectTerminal m_PCH_Keyboard_Interconnect = new InterconnectTerminal(32, 10);
 		static InterconnectTerminal m_Keyboard_PCH_Interconnect = new InterconnectTerminal(32, 10);
 
-        public const uint PCHStartAddress = 128;
-        public const uint biosStartAddress = 128;
+		public const uint PICAddress = 32;
+		public const uint PCHStartAddress = 512;
+        public const uint biosStartAddress = PCHStartAddress;
         public const uint displayStartAddress = biosStartAddress + 1024;
 		public const uint keyboardStartAddress = displayStartAddress + 4;
+		
 
 		static List<InterconnectTerminal> m_interconnects = new List<InterconnectTerminal>();
 
@@ -55,7 +57,7 @@ namespace Virutal_Machine
 
             m_bios = new Bios(biosStartAddress, m_BIOS_PCH_Interconnect);
             m_display = new Display(displayStartAddress, m_Display_PCH_Interconnect);
-			m_keyboard = new VMKeyboard(m_cpu.LocalPIC, m_Keyboard_PCH_Interconnect);
+			m_keyboard = new VMKeyboard(m_Keyboard_PCH_Interconnect);
 
             m_PCH = new PlatformControlHub(m_PCH_CPU_Interconnect, PCHStartAddress);
 

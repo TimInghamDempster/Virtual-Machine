@@ -8,20 +8,18 @@ namespace Virutal_Machine
 {
 	class VMKeyboard
 	{
-		private InterruptController m_interruptController;
 		InterconnectTerminal m_systemInterconnect;
 
 		char m_currentKey;
 		bool m_hasCurrentKey;
 
 		bool m_isSendingKey;
-		int m_returnAddress;
+		bool m_isInterrupting;
 
-		const uint InterruptNo = 0;
+		public const uint InterruptNo = 32;
 
-		public VMKeyboard(InterruptController interruptController, InterconnectTerminal systemInterconnect)
+		public VMKeyboard(InterconnectTerminal systemInterconnect)
 		{
-			m_interruptController = interruptController;
 			m_systemInterconnect = systemInterconnect;
 		}
 
@@ -33,7 +31,7 @@ namespace Virutal_Machine
 				if(m_hasCurrentKey == false)
 				{
 					m_hasCurrentKey = true;
-					m_interruptController.Interrupt(InterruptNo);
+					m_isInterrupting = true;
 				}
 			}
 			else
@@ -47,17 +45,30 @@ namespace Virutal_Machine
 				m_systemInterconnect.ReadRecievedPacket(buffer);
 				m_systemInterconnect.ClearRecievedPacket();
 
-				m_returnAddress = buffer[2];
 				m_isSendingKey = true;
+			}
+
+			if(m_isInterrupting)
+			{
+				int[] buffer = new int[2];
+				buffer[0] = (int)MessageType.Interrupt;
+				buffer[1] = (int)InterruptNo;
+				
+				bool sent = m_systemInterconnect.SendPacket(buffer, buffer.Count());
+
+				if (sent)
+				{
+					m_isInterrupting = false;
+				}
 			}
 
 			if(m_isSendingKey)
 			{
 				int[] buffer = new int[2];
-				buffer[0] = m_returnAddress;
+				buffer[0] = (int)MessageType.Response;
 				buffer[1] = m_currentKey;
 
-				bool sent = m_systemInterconnect.SendPacket(buffer, 2);
+				bool sent = m_systemInterconnect.SendPacket(buffer, buffer.Count());
 
 				if(sent)
 				{

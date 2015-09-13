@@ -43,31 +43,34 @@ namespace Virutal_Machine
 
                 m_systemInterconnect.ClearRecievedPacket();
 
-                if (packet[0] == (int)m_startAddress)
-                {
-                    switch ((DisplayCommands)packet[1])
-                    {
-                        case DisplayCommands.Newline:
-                            {
-                                m_newline = true;
-                            } break;
-                        case DisplayCommands.WriteChar:
-                            {
-                                m_currentLine[m_cursorPos] = m_currentChar;
-                            } break;
-                    }
-                }
-                else if (packet[0] == (int)m_startAddress + 1)
-                {
-                    if (packet[1] > 0 && packet[1] < m_currentLine.Count())
-                    {
-                        m_cursorPos = packet[1];
-                    }
-                }
-                else if (packet[0] == (int)m_startAddress + 2)
-                {
-                    m_currentChar = (char)packet[1];
-                }
+				if(packet[0] == (int)MessageType.Write)
+				{
+					if (packet[1] == (int)m_startAddress)
+					{
+						switch ((DisplayCommands)packet[2])
+						{
+							case DisplayCommands.Newline:
+								{
+									m_newline = true;
+								} break;
+							case DisplayCommands.WriteChar:
+								{
+									m_currentLine[m_cursorPos] = m_currentChar;
+								} break;
+						}
+					}
+					else if (packet[1] == (int)m_startAddress + 1)
+					{
+						if (packet[2] > 0 && packet[2] < m_currentLine.Count())
+						{
+							m_cursorPos = packet[2];
+						}
+					}
+					else if (packet[1] == (int)m_startAddress + 2)
+					{
+						m_currentChar = (char)packet[2];
+					}
+				}
             }
 
            

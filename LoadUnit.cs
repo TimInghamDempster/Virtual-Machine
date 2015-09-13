@@ -41,11 +41,11 @@ namespace Virutal_Machine
 						if (m_waitingForMemory == false)
 						{
 							int[] newPacket = new int[3];
-							newPacket[0] = m_registers[m_currentInstruction[0] & 0x000000ff] + m_currentInstruction[1];
-							newPacket[1] = (int)ExecutionUnitCodes.Load;
+							newPacket[0] = (int)MessageType.Read;
+							newPacket[1] = m_registers[m_currentInstruction[0] & 0x000000ff] + m_currentInstruction[1];
 							newPacket[2] = 1;
 
-							bool requestSent = m_IOInterconnect.SendPacket(newPacket, 3);
+							bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
 
 							if (requestSent)
 							{
@@ -62,11 +62,11 @@ namespace Virutal_Machine
 							if (m_waitingForMemory == false)
 							{
 								int[] newPacket = new int[3];
-								newPacket[0] = (m_currentInstruction[0] & 0x000000ff) + m_currentInstruction[1];
-								newPacket[1] = 1;
-								newPacket[2] = (int)ExecutionUnitCodes.Load;
+								newPacket[0] = (int)MessageType.Read;
+								newPacket[1] = (m_currentInstruction[0] & 0x000000ff) + m_currentInstruction[1];
+								newPacket[2] = 1;
 
-								bool requestSent = m_IOInterconnect.SendPacket(newPacket, 3);
+								bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
 
 								if (requestSent)
 								{
@@ -89,16 +89,13 @@ namespace Virutal_Machine
 				int[] recivedPacket = new int[m_IOInterconnect.RecievedSize];
 				m_IOInterconnect.ReadRecievedPacket(recivedPacket);
 
-				if (recivedPacket[0] == (int)ExecutionUnitCodes.Load)
-				{
-					m_IOInterconnect.ClearRecievedPacket();
-					m_waitingForMemory = false;
-					m_hasInstruction = false;
+				m_IOInterconnect.ClearRecievedPacket();
+				m_waitingForMemory = false;
+				m_hasInstruction = false;
 
-					m_registers[(m_currentInstruction[0] >> 8) & 0x000000ff] = recivedPacket[1];
+				m_registers[(m_currentInstruction[0] >> 8) & 0x000000ff] = recivedPacket[1];
 
-					m_CPUCore.NextStage = PipelineStages.BranchPredict;
-				}
+				m_CPUCore.NextStage = PipelineStages.BranchPredict;
 			}
 		}
 

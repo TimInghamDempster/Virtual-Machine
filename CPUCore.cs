@@ -29,11 +29,14 @@ namespace Virutal_Machine
     class CPUCore
     {
         uint m_instructionPointer;
-		public uint m_storedIPointer;
+		uint m_storedInstructionPointer;
         
         int[] m_registers;
 
 		uint m_coreId;
+
+		bool m_interruptWaiting;
+		bool m_interrupted;
 
         PipelineStages m_currentStage;
         PipelineStages m_nextStage;
@@ -47,7 +50,6 @@ namespace Virutal_Machine
         LoadUnit m_loadUnit;
         StoreUnit m_storeUnit;
         RetireUnit m_retireUnit;
-		private InterruptController m_interruptController;
 
 		public PipelineStages CurrentStage { get { return m_currentStage; } }
 		public PipelineStages NextStage { set { m_nextStage = value; } }
@@ -59,8 +61,7 @@ namespace Virutal_Machine
 		{
 			m_coreId = id;
             m_instructionPointer = Program.biosStartAddress;
-			this.m_interruptController = interruptController;
-			interruptController.AddCore(this, (uint ip) => m_instructionPointer = ip);
+			interruptController.AddCore(Interrupt);
             m_registers = new int[10];
             m_currentStage = PipelineStages.InstructionFetch;
             m_nextStage = PipelineStages.InstructionFetch;
@@ -71,12 +72,25 @@ namespace Virutal_Machine
             m_loadUnit = new LoadUnit(this, m_IOInterconnect, m_registers);
             m_storeUnit = new StoreUnit(this, IOInterconnect, m_registers);
             m_branchUnit = new BranchUnit(this, m_registers, (uint ip) => m_instructionPointer = ip );
-            m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit, m_interruptController);
-            m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit);
+            m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit);
+            m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit, EndInterrupt);
         }
+
+		void Interrupt()
+		{
+			m_interruptWaiting = true;
+		}
+
+		void EndInterrupt()
+		{
+			m_interrupted = false;
+			m_instructionPointer = m_storedInstructionPointer;
+			m_nextStage = PipelineStages.InstructionFetch;
+		}
 
         public void Tick()
         {
+
             m_branchUnit.Tick();
             m_fetchUnit.Tick();
             m_dispatchUnit.Tick();
@@ -85,6 +99,18 @@ namespace Virutal_Machine
             m_loadUnit.Tick();
             m_storeUnit.Tick();
             m_retireUnit.Tick();
+
+			// Only safe time to do this is right before a fetch
+			if (m_interruptWaiting &&
+			m_currentStage != PipelineStages.InstructionFetch && m_nextStage == PipelineStages.InstructionFetch
+				&& !m_interrupted)
+			{
+				m_storedInstructionPointer = m_instructionPointer;
+				m_fetchUnit.DoInterrupt();
+
+				m_interruptWaiting = false;
+				m_interrupted = true;
+			}
 
             m_currentStage = m_nextStage;
         }

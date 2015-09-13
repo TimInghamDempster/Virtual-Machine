@@ -43,9 +43,9 @@ namespace Virutal_Machine
                             int value = m_registers[sourceRegister];
 
                             int[] packet = new int[3];
-                            packet[0] = (int)address;
-                            packet[1] = value;
-							packet[2] = (int)ExecutionUnitCodes.Store;
+							packet[0] = (int)MessageType.Write;
+                            packet[1] = (int)address;
+                            packet[2] = value;
                             bool stored = m_ioInterconnect.SendPacket(packet, packet.Count());
                             
                             if (stored)
@@ -61,9 +61,9 @@ namespace Virutal_Machine
                             int value = m_registers[sourceRegister];
 
                             int[] packet = new int[3];
-                            packet[0] = (int)address;
-							packet[1] = value;
-							packet[2] = (int)ExecutionUnitCodes.Store;
+							packet[0] = (int)MessageType.Write;
+							packet[1] = (int)address;
+							packet[2] = value;
                             bool stored = m_ioInterconnect.SendPacket(packet, packet.Count());
                             
                             if (stored)

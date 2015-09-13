@@ -15,7 +15,6 @@ namespace Virutal_Machine
 		ArithmeticLogicUnit m_complexALU;
 		LoadUnit m_loadUnit;
 		StoreUnit m_storeUnit;
-		InterruptController m_interruptController;
 
 		int[] m_currentInstruction;
 
@@ -24,8 +23,7 @@ namespace Virutal_Machine
 			ArithmeticLogicUnit simpleALU,
 			ArithmeticLogicUnit complexALU,
 			LoadUnit loadUnit,
-			StoreUnit storeUnit,
-			InterruptController interruptController)
+			StoreUnit storeUnit)
 		{
 			m_CPUCore = cPUCore;
 			m_branchUnit = branchUnit;
@@ -33,7 +31,6 @@ namespace Virutal_Machine
 			m_simpleALU = simpleALU;
 			m_loadUnit = loadUnit;
 			m_storeUnit = storeUnit;
-			m_interruptController = interruptController;
 		}
 
 		public void Tick()
@@ -63,11 +60,6 @@ namespace Virutal_Machine
 							m_branchUnit.SetInstruction(m_currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.BranchPredict;
 						} break;
-					case ExecutionUnitCodes.Interrupt:
-						{
-							m_interruptController.SetInstruction(m_currentInstruction);
-							m_CPUCore.NextStage = PipelineStages.BranchPredict;
-						}break;
 					case ExecutionUnitCodes.Nop:
 						{
 							// Do we want to fetch here or move the isntruction pointer?

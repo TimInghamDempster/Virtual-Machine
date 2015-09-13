@@ -6,6 +6,15 @@ using System.Threading.Tasks;
 
 namespace Virutal_Machine
 {
+	enum MessageType
+	{
+		Read,
+		Write,
+		Response,
+		Command,
+		Interrupt
+	}
+
     class InterconnectTerminal
     {
         int m_cyclesPerInt;
