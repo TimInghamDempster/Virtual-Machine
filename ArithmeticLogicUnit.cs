@@ -22,16 +22,14 @@ namespace Virutal_Machine
 
 	class ArithmeticLogicUnit
 	{
-		bool m_complex;
 		CPUCore m_CPUCore;
 
 		int[] m_currentInstruction;
 		int[] m_registers;
 		bool m_hasInstruction;
 
-		public ArithmeticLogicUnit(bool complex, CPUCore cPUCore, int[] registers)
+		public ArithmeticLogicUnit(CPUCore cPUCore, int[] registers)
 		{
-			m_complex = complex;
 			m_CPUCore = cPUCore;
 			m_registers = registers;
 		}

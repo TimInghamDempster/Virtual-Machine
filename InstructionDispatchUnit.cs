@@ -11,8 +11,7 @@ namespace Virutal_Machine
 		CPUCore m_CPUCore;
 
 		BranchUnit m_branchUnit;
-		ArithmeticLogicUnit m_simpleALU;
-		ArithmeticLogicUnit m_complexALU;
+		ArithmeticLogicUnit m_ALU;
 		LoadUnit m_loadUnit;
 		StoreUnit m_storeUnit;
 
@@ -20,15 +19,13 @@ namespace Virutal_Machine
 
 		public InstructionDispatchUnit(CPUCore cPUCore,
 			BranchUnit branchUnit,
-			ArithmeticLogicUnit simpleALU,
-			ArithmeticLogicUnit complexALU,
+			ArithmeticLogicUnit ALU,
 			LoadUnit loadUnit,
 			StoreUnit storeUnit)
 		{
 			m_CPUCore = cPUCore;
 			m_branchUnit = branchUnit;
-			m_complexALU = complexALU;
-			m_simpleALU = simpleALU;
+			m_ALU = ALU;
 			m_loadUnit = loadUnit;
 			m_storeUnit = storeUnit;
 		}
@@ -42,7 +39,7 @@ namespace Virutal_Machine
 				{
 					case UnitCodes.ALU:
 						{
-							m_simpleALU.SetInstruction(m_currentInstruction);
+							m_ALU.SetInstruction(m_currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
 					case UnitCodes.Load:

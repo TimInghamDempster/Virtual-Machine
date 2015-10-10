@@ -45,8 +45,7 @@ namespace Virutal_Machine
         BranchUnit m_branchUnit;
         InstructionFetchUnit m_fetchUnit;
         InstructionDispatchUnit m_dispatchUnit;
-        ArithmeticLogicUnit m_simpleALU;
-        ArithmeticLogicUnit m_complexALU;
+        ArithmeticLogicUnit m_ALU;
         LoadUnit m_loadUnit;
         StoreUnit m_storeUnit;
         RetireUnit m_retireUnit;
@@ -67,12 +66,11 @@ namespace Virutal_Machine
             m_nextStage = PipelineStages.InstructionFetch;
             m_IOInterconnect = IOInterconnect;
             m_retireUnit = new RetireUnit(this);
-            m_simpleALU = new ArithmeticLogicUnit(false, this, m_registers);
-            m_complexALU = new ArithmeticLogicUnit(true, this, m_registers);
+            m_ALU = new ArithmeticLogicUnit(this, m_registers);
             m_loadUnit = new LoadUnit(this, m_IOInterconnect, m_registers);
             m_storeUnit = new StoreUnit(this, IOInterconnect, m_registers);
             m_branchUnit = new BranchUnit(this, m_registers, (uint ip) => m_instructionPointer = ip );
-            m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_simpleALU, m_complexALU, m_loadUnit, m_storeUnit);
+            m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_ALU, m_loadUnit, m_storeUnit);
             m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit, EndInterrupt);
         }
 
@@ -94,8 +92,7 @@ namespace Virutal_Machine
             m_branchUnit.Tick();
             m_fetchUnit.Tick();
             m_dispatchUnit.Tick();
-            m_simpleALU.Tick();
-            m_complexALU.Tick();
+            m_ALU.Tick();
             m_loadUnit.Tick();
             m_storeUnit.Tick();
             m_retireUnit.Tick();
