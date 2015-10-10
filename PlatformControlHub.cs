@@ -17,15 +17,12 @@ namespace Virutal_Machine
             m_cpuTerminal = cpuTerminal;
             m_deviceTerminals = new List<InterconnectTerminal>();
             m_deviceAddresses = new List<uint>();
-            m_deviceAddresses.Add(baseAddress);
         }
 
-        public void AddDevice(InterconnectTerminal deviceTerminal, uint size)
+        public void AddDevice(InterconnectTerminal deviceTerminal, uint address)
         {
             m_deviceTerminals.Add(deviceTerminal);
-
-            uint topAddress = m_deviceAddresses[m_deviceAddresses.Count - 1];
-            m_deviceAddresses.Add(topAddress + size);
+			m_deviceAddresses.Add(address);
         }
 
         public void Tick()
@@ -43,14 +40,26 @@ namespace Virutal_Machine
 
                 for (int i = 0; i < m_deviceTerminals.Count; i++)
                 {
-                    if (destAddress >= m_deviceAddresses[i] && destAddress < m_deviceAddresses[i + 1])
-                    {
-                            bool sent = m_deviceTerminals[i].SendPacket(packet, packet.Count());
-                            if(sent)
-                            {
-                                m_cpuTerminal.ClearRecievedPacket();
-                            }
-                    }
+                    if (i + 1 < m_deviceAddresses.Count)
+					{
+						if( (destAddress >= m_deviceAddresses[i]) && (destAddress < m_deviceAddresses[i + 1]))
+						{
+							bool sent = m_deviceTerminals[i].SendPacket(packet, packet.Count());
+							if(sent)
+							{
+								m_cpuTerminal.ClearRecievedPacket();
+							}
+							break;
+						}
+					}
+					else //if(i + 1 == m_deviceAddresses.Count)
+					{
+						bool sent = m_deviceTerminals[i].SendPacket(packet, packet.Count());
+						if (sent)
+						{
+							m_cpuTerminal.ClearRecievedPacket();
+						}
+					}
                 }
             }
 

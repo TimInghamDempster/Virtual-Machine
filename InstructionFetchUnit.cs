@@ -28,8 +28,6 @@ namespace Virutal_Machine
 
 		Action EndInterrupt;
 
-		bool b_interrupting;
-
         public InstructionFetchUnit(CPUCore cPUCore, InterconnectTerminal IOInterconnect, InstructionDispatchUnit dispatchUnit, Action endInterrupt)
         {
             m_CPUCore = cPUCore;
@@ -68,12 +66,11 @@ namespace Virutal_Machine
 
 							m_IOInterconnect.ClearRecievedPacket();
 
-							if ((receivedPacket[1] & 0xff000000) == (int)ExecutionUnitCodes.Interrupt
+							if ((receivedPacket[1] & 0xff000000) == (int)UnitCodes.Interrupt
 								&& (receivedPacket[1] & 0x00ff0000) == (int)InterruptInstructions.InterruptReturn)
 							{
 								EndInterrupt();
 								m_waitingForMemory = false;
-								b_interrupting = false;
 							}
 							else
 							{
@@ -141,7 +138,7 @@ namespace Virutal_Machine
 							int handlerLocation = receivedPacket[1];
 
 							int[] newInstruction = new int[2];
-							newInstruction[0] = (int)ExecutionUnitCodes.Branch | (int)BranchOperations.Jump;
+							newInstruction[0] = (int)UnitCodes.Branch | (int)BranchOperations.Jump;
 							newInstruction[1] = handlerLocation;
 
 							m_dispatchUnit.SetInstruction(newInstruction);
@@ -159,7 +156,6 @@ namespace Virutal_Machine
 		{
 			m_interruptPhase = InterruptPhase.RequestId;
 			m_startInterrupt = true;
-			b_interrupting = true;
 		}
 	}
 }

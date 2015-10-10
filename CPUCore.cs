@@ -15,7 +15,7 @@ namespace Virutal_Machine
         Retirement
     }
 
-    enum ExecutionUnitCodes
+    enum UnitCodes
     {
         Nop,
         ALU			= 1 << 24,

@@ -6,77 +6,83 @@ using System.Threading.Tasks;
 
 namespace Virutal_Machine
 {
-    enum ALUOperations
-    {
-        AddLiteral,
-        SetLiteral = 1 << 16,
-        CopyRegister = 2 << 16
-    }
+	enum ALUOperations
+	{
+		Nop,
+		SetLiteral		= 1 << 16,
+		Add				= 2 << 16,
+		AddLiteral		= 3 << 16,
+		Subtract		= 4 << 16,
+		SubtractLiteral	= 5 << 16,
+		Multiply		= 6 << 16,
+		MultiplyLiteral	= 7 << 16,
+		Divide			= 8 << 16,
+		DivideLiteral	= 9 << 16
+	}
 
-    class ArithmeticLogicUnit
-    {
-        bool m_complex;
-        CPUCore m_CPUCore;
-        Dictionary<ALUOperations, uint> m_cycleCountsPerInstruction;
+	class ArithmeticLogicUnit
+	{
+		bool m_complex;
+		CPUCore m_CPUCore;
 
-        int[] m_currentInstruction;
+		int[] m_currentInstruction;
 		int[] m_registers;
-        bool m_hasInstruction;
-        uint m_currentInstructionTimeRemaining;
+		bool m_hasInstruction;
 
-        public ArithmeticLogicUnit(bool complex, CPUCore cPUCore, int[] registers)
-        {
-            m_complex = complex;
-            m_CPUCore = cPUCore;
-            SetupCycleCounts();
+		public ArithmeticLogicUnit(bool complex, CPUCore cPUCore, int[] registers)
+		{
+			m_complex = complex;
+			m_CPUCore = cPUCore;
 			m_registers = registers;
-        }
+		}
 
-        private void SetupCycleCounts()
-        {
-            m_cycleCountsPerInstruction = new Dictionary<ALUOperations, uint>();
+		public void Tick()
+		{
+			if (m_CPUCore.CurrentStage == PipelineStages.Execution && m_hasInstruction == true)
+			{
+				ALUOperations instructionCode = (ALUOperations)(m_currentInstruction[0] & 0x00ff0000);
+				int targetRegister = (m_currentInstruction[0] & 0x0000ff00) >> 8;
+				int sourceRegister = m_currentInstruction[0] & 0x000000ff;
+				switch (instructionCode)
+				{
 
-            m_cycleCountsPerInstruction.Add(ALUOperations.AddLiteral, 1);
-			m_cycleCountsPerInstruction.Add(ALUOperations.SetLiteral, 1);
-			m_cycleCountsPerInstruction.Add(ALUOperations.CopyRegister, 1);
-        }
+					case ALUOperations.Add:
+						m_registers[targetRegister] = m_registers[sourceRegister] + m_registers[m_currentInstruction[1]];
+						break;
+					case ALUOperations.AddLiteral:
+						m_registers[targetRegister] = m_registers[sourceRegister] + m_currentInstruction[1];
+						break;
+					case ALUOperations.Subtract:
+						m_registers[targetRegister] = m_registers[sourceRegister] - m_registers[m_currentInstruction[1]];
+						break;
+					case ALUOperations.SubtractLiteral:
+						m_registers[targetRegister] = m_registers[sourceRegister] - m_currentInstruction[1];
+						break;
+					case ALUOperations.Multiply:
+						m_registers[targetRegister] = m_registers[sourceRegister] * m_registers[m_currentInstruction[1]];
+						break;
+					case ALUOperations.MultiplyLiteral:
+						m_registers[targetRegister] = m_registers[sourceRegister] * m_currentInstruction[1];
+						break;
+					case ALUOperations.Divide:
+						m_registers[targetRegister] = m_registers[sourceRegister] / m_registers[m_currentInstruction[1]];
+						break;
+					case ALUOperations.DivideLiteral:
+						m_registers[targetRegister] = m_registers[sourceRegister] / m_currentInstruction[1];
+						break;
+					case ALUOperations.SetLiteral:
+						m_registers[targetRegister] = m_currentInstruction[1];
+						break;
+				}
+				m_hasInstruction = false;
+				m_CPUCore.NextStage = PipelineStages.BranchPredict;
+			}
+		}
 
-        public void Tick()
-        {
-            if (m_CPUCore.CurrentStage == PipelineStages.Execution && m_hasInstruction == true)
-            {
-                if (m_currentInstructionTimeRemaining > 0)
-                {
-                    m_currentInstructionTimeRemaining--;
-                }
-                else
-                {
-                    ALUOperations instructionCode = (ALUOperations)(m_currentInstruction[0] & 0x00ff0000);
-                    int targetRegister = (m_currentInstruction[0] & 0x0000ff00) >> 8;
-					int sourceRegister = m_currentInstruction[0] & 0x000000ff;
-                    switch (instructionCode)
-                    {
-                        case ALUOperations.AddLiteral:
-							m_registers[targetRegister] = m_registers[sourceRegister] + m_currentInstruction[1];
-                            break;
-                        case ALUOperations.SetLiteral:
-							m_registers[targetRegister] = m_currentInstruction[1];
-                            break;
-                        case ALUOperations.CopyRegister:
-							m_registers[targetRegister] = m_registers[m_currentInstruction[1]];
-                            break;
-                    }
-                    m_hasInstruction = false;
-                    m_CPUCore.NextStage = PipelineStages.BranchPredict;
-                }
-            }
-        }
-
-        public void SetInstruction(int[] instruction)
-        {
-            m_hasInstruction = true;
-            m_currentInstruction = instruction;
-            m_currentInstructionTimeRemaining = m_cycleCountsPerInstruction[(ALUOperations)(instruction[0] & 0x00ff0000)] - 1;
-        }
-    }
+		public void SetInstruction(int[] instruction)
+		{
+			m_hasInstruction = true;
+			m_currentInstruction = instruction;
+		}
+	}
 }

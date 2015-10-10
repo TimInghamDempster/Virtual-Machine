@@ -37,30 +37,30 @@ namespace Virutal_Machine
 		{
 			if (m_CPUCore.CurrentStage == PipelineStages.InstructionDispatch)
 			{
-				ExecutionUnitCodes executionUnitCode = (ExecutionUnitCodes)(m_currentInstruction[0] & 0xff000000);
+				UnitCodes executionUnitCode = (UnitCodes)(m_currentInstruction[0] & 0xff000000);
 				switch (executionUnitCode)
 				{
-					case ExecutionUnitCodes.ALU:
+					case UnitCodes.ALU:
 						{
 							m_simpleALU.SetInstruction(m_currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
-					case ExecutionUnitCodes.Load:
+					case UnitCodes.Load:
 						{
 							m_loadUnit.SetInstruction(m_currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
-					case ExecutionUnitCodes.Store:
+					case UnitCodes.Store:
 						{
 							m_storeUnit.SetInstruction(m_currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
-					case ExecutionUnitCodes.Branch:
+					case UnitCodes.Branch:
 						{
 							m_branchUnit.SetInstruction(m_currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.BranchPredict;
 						} break;
-					case ExecutionUnitCodes.Nop:
+					case UnitCodes.Nop:
 						{
 							// Do we want to fetch here or move the isntruction pointer?
 							// Almost certainly in an invalid state anyway so no correct answer.

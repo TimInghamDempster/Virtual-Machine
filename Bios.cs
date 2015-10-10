@@ -35,29 +35,24 @@ namespace Virutal_Machine
 										// Instructions
 
 										// Set up keyboard interrupt handler
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	(int)m_startAddress + 6,				// Set register 0 to address 6 (keyboard ISR address)
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)VMKeyboard.InterruptNo,			// Write keyboard ISR address from register 0 to PIC
-										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.Jump						|	0 << 8	|	0,	(int)m_startAddress + 10,				// Jump to program start
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	(int)m_startAddress + 6,				// Set register 0 to address 6 (keyboard ISR address)
+										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)VMKeyboard.InterruptNo,			// Write keyboard ISR address from register 0 to PIC
+										(int)UnitCodes.Branch		|	(int)BranchOperations.Jump						|	0 << 8	|	0,	(int)m_startAddress + 10,				// Jump to program start
 
 										// Keyboard interrupt handler
-										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromLiteralLocation		|	9 << 8	|	0,	(int)Program.keyboardStartAddress,		// Copy last key pressed into register 9
-										(int)ExecutionUnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn		|	0 << 8	|	0,	0,										// Return to execution
+										(int)UnitCodes.Load		|	(int)LoadOperations.LoadFromLiteralLocation		|	9 << 8	|	0,	(int)Program.keyboardStartAddress,			// Copy last key pressed into register 9
+										(int)UnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn		|	0 << 8	|	0,	0,										// Return to execution
 
 										// Write "Hello world"
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	4 << 8	|	0,	26,										// Put string length into register 4
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	0,										// Put desired cursor pos into register 0
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	(int)m_startAddress + 36,				// Put location of start of string into register 1
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2 << 8	|	0,	0,										// Put write character code into register 2
-										(int)ExecutionUnitCodes.Load		|	(int)LoadOperations.LoadFromRegisterLocation	|	3 << 8	|	1,	0,										// Load the value from the location specified in register 1 into register 3
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayStartAddress + 1,	// Set cursor pos
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	3,	(int)Program.displayStartAddress + 2,	// Set character
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	2,	(int)Program.displayStartAddress,		// Write character
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment string pointer
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	0 << 8	|	0,	1,										// Increment cursor position register
-										(int)ExecutionUnitCodes.Branch		|	(int)BranchOperations.JumpNotEqual				|	0 << 8	|	4,	(int)m_startAddress + 18,				// Loop if not at string end
-										(int)ExecutionUnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	(int)DisplayCommands.Newline,			// Set register 0 to "newline" command
-										(int)ExecutionUnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayStartAddress,		// Send newline command to display
-										
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	26,										// Put string length into register 4
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	0,										// Put desired cursor pos into register 0
+										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromRegisterLocation	|	2 << 8	|	1,	(int)Program.biosStartAddress + 26,		// Load next char into register 2
+										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToRegisterLocation	|	1 << 8	|	2,	(int)Program.displayStartAddress,		// Store char from register 2 to (display + register 1)
+										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment cursor/string pos
+										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpLess					|	1 << 8	|	0,	(int)Program.biosStartAddress + 14,		// Loop if not written enough characters
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	(int)DisplayCommands.Refresh,			// Set the screen refresh command into register 0
+										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayCommandAddress,		// Write refresh command to display command buffer.
+
 										// Data section
 										// "hello what's your name?"
 										0x00000068,

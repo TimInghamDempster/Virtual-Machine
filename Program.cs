@@ -30,7 +30,8 @@ namespace Virutal_Machine
 		public const uint PCHStartAddress = 512;
         public const uint biosStartAddress = PCHStartAddress;
         public const uint displayStartAddress = biosStartAddress + 1024;
-		public const uint keyboardStartAddress = displayStartAddress + 4;
+		public const uint displayCommandAddress = displayStartAddress + 2048;
+		public const uint keyboardStartAddress = displayCommandAddress + 4;
 		
 
 		static List<InterconnectTerminal> m_interconnects = new List<InterconnectTerminal>();
@@ -61,9 +62,9 @@ namespace Virutal_Machine
 
             m_PCH = new PlatformControlHub(m_PCH_CPU_Interconnect, PCHStartAddress);
 
-            m_PCH.AddDevice(m_PCH_BIOS_Interconnect, 1024);
-            m_PCH.AddDevice(m_PCH_Display_Interconnect, 4);
-			m_PCH.AddDevice(m_PCH_Keyboard_Interconnect, 1);
+            m_PCH.AddDevice(m_PCH_BIOS_Interconnect, biosStartAddress);
+            m_PCH.AddDevice(m_PCH_Display_Interconnect, displayStartAddress);
+			m_PCH.AddDevice(m_PCH_Keyboard_Interconnect, keyboardStartAddress);
 
             while (true)
             {

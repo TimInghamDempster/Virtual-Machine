@@ -8,8 +8,8 @@ namespace Virutal_Machine
 {
     enum DisplayCommands
     {
-        WriteChar,
-        Newline
+        Refresh,
+        Clear
     }
 
     class Display
@@ -17,19 +17,16 @@ namespace Virutal_Machine
         InterconnectTerminal m_systemInterconnect;
 
         uint m_startAddress;
-        const int m_lineLength = 64;
-        char[] m_currentLine;
-        bool m_newline = false;
-
-        int m_cursorPos;
-        char m_currentChar;
-
-		int m_tickCount;
+        int m_lineLength = Console.WindowWidth - 1;
+		int m_numlines = Console.WindowHeight - 1;
+		uint m_commandAddress;
+        char[] m_charData;
 
         public Display(uint startAddress, InterconnectTerminal systemInterconnect)
         {
             m_startAddress = startAddress;
-            m_currentLine = new char[m_lineLength];
+			m_commandAddress = Program.displayCommandAddress;
+            m_charData = new char[m_lineLength * m_numlines];
 
             m_systemInterconnect = systemInterconnect;
         }
@@ -45,56 +42,41 @@ namespace Virutal_Machine
 
 				if(packet[0] == (int)MessageType.Write)
 				{
-					if (packet[1] == (int)m_startAddress)
+					if (packet[1] < (int)m_commandAddress)
 					{
-						switch ((DisplayCommands)packet[2])
-						{
-							case DisplayCommands.Newline:
-								{
-									m_newline = true;
-								} break;
-							case DisplayCommands.WriteChar:
-								{
-									m_currentLine[m_cursorPos] = m_currentChar;
-								} break;
-						}
+						m_charData[packet[1] - m_startAddress] = (char)packet[2];
 					}
-					else if (packet[1] == (int)m_startAddress + 1)
+					else if (packet[1] == (int)m_commandAddress)
 					{
-						if (packet[2] > 0 && packet[2] < m_currentLine.Count())
+						switch((DisplayCommands)packet[2])
 						{
-							m_cursorPos = packet[2];
+							case DisplayCommands.Clear:
+							{
+								Array.Clear(m_charData, 0, m_charData.Length);
+								Refresh();
+							}break;
+							case DisplayCommands.Refresh:
+							{
+								Refresh();	
+							}break;
 						}
-					}
-					else if (packet[1] == (int)m_startAddress + 2)
-					{
-						m_currentChar = (char)packet[2];
 					}
 				}
             }
-
-           
-
-			m_tickCount++;
-
-			if((m_tickCount % 100000) == 0)
-			{
-				Console.SetCursorPosition(0, Console.CursorTop);
-				Console.Write(m_currentLine);
-				Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-
-				if (m_newline)
-				{
-					Console.WriteLine();
-
-					for (int i = 0; i < m_lineLength; i++)
-					{
-						m_currentLine[i] = ' ';
-					}
-
-					m_newline = false;
-				}
-			}
         }
+
+		public void Refresh()
+		{
+			Console.CursorTop = 0;
+			Console.CursorLeft = 0;
+			for(int y = 0; y < m_numlines; y++)
+			{
+				for(int x = 0; x < m_lineLength; x++)
+				{
+					Console.Write(m_charData[x + y * m_lineLength]);
+				}
+				Console.Write('\n');
+			}
+		}
     }
 }

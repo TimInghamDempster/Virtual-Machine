@@ -33,6 +33,7 @@ namespace Virutal_Machine
 					m_hasCurrentKey = true;
 					m_isInterrupting = true;
 				}
+				Console.Write("\b \b");
 			}
 			else
 			{

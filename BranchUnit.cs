@@ -11,7 +11,10 @@ namespace Virutal_Machine
 		Nop,
 		Jump			= 1 << 16,
 		JumpNotEqual	= 2 << 16,
-		Break			= 3 << 16
+		JumpEqual		= 3 << 16,
+		JumpLessEqual	= 4 << 16,
+		JumpLess		= 5 << 16,
+		Break			= 6 << 16
 	}
 
 	class BranchUnit
@@ -51,16 +54,61 @@ namespace Virutal_Machine
 								int register1 = (m_currentOp[0] >> 8) & 0x000000ff;
 								int register2 = m_currentOp[0] & 0x000000ff;
 
-								if(m_registers[register1] == m_registers[register2])
-								{
-									SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
-								}
-								else
+								if(m_registers[register1] != m_registers[register2])
 								{
 									SetInstructionPointer((uint)m_currentOp[1]);
 								}
+								else
+								{
+									SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
+								}
 								m_hasInstruction = false;
 							}break;
+						case BranchOperations.JumpEqual:
+							{
+								int register1 = (m_currentOp[0] >> 8) & 0x000000ff;
+								int register2 = m_currentOp[0] & 0x000000ff;
+
+								if (m_registers[register1] == m_registers[register2])
+								{
+									SetInstructionPointer((uint)m_currentOp[1]);
+								}
+								else
+								{
+									SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
+								}
+								m_hasInstruction = false;
+							} break;
+						case BranchOperations.JumpLess:
+							{
+								int register1 = (m_currentOp[0] >> 8) & 0x000000ff;
+								int register2 = m_currentOp[0] & 0x000000ff;
+
+								if (m_registers[register1] < m_registers[register2])
+								{
+									SetInstructionPointer((uint)m_currentOp[1]);
+								}
+								else
+								{
+									SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
+								}
+								m_hasInstruction = false;
+							} break;
+						case BranchOperations.JumpLessEqual:
+							{
+								int register1 = (m_currentOp[0] >> 8) & 0x000000ff;
+								int register2 = m_currentOp[0] & 0x000000ff;
+
+								if (m_registers[register1] <= m_registers[register2])
+								{
+									SetInstructionPointer((uint)m_currentOp[1]);
+								}
+								else
+								{
+									SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
+								}
+								m_hasInstruction = false;
+							} break;
 						case BranchOperations.Break:
 							{
 								System.Diagnostics.Debugger.Break();
