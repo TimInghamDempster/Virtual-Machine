@@ -31,6 +31,8 @@ namespace Virutal_Machine
         public const uint biosStartAddress = PCHStartAddress;
         public const uint displayStartAddress = biosStartAddress + 1024;
 		public const uint displayCommandAddress = displayStartAddress + 2048;
+		public const uint displayFgColourAddress = displayCommandAddress + 1;
+		public const uint displayBkgColourAddress = displayCommandAddress + 2;
 		public const uint keyboardStartAddress = displayCommandAddress + 4;
 		
 

@@ -21,12 +21,26 @@ namespace Virutal_Machine
 		int m_numlines = Console.WindowHeight - 1;
 		uint m_commandAddress;
         char[] m_charData;
+		ConsoleColor[] m_foregroundColours;
+		ConsoleColor[] m_backgroundColours;
+		ConsoleColor m_cursorForeground;
+		ConsoleColor m_cursorBackground;
+		private uint m_foregroundColourAddress;
+		private uint m_backgroundColourAddress;
 
         public Display(uint startAddress, InterconnectTerminal systemInterconnect)
         {
             m_startAddress = startAddress;
 			m_commandAddress = Program.displayCommandAddress;
+			m_foregroundColourAddress = Program.displayFgColourAddress;
+			m_backgroundColourAddress = Program.displayBkgColourAddress;
+
             m_charData = new char[m_lineLength * m_numlines];
+			m_backgroundColours = new ConsoleColor[m_lineLength * m_numlines];
+			m_foregroundColours = new ConsoleColor[m_lineLength * m_numlines];
+
+			m_cursorForeground = ConsoleColor.White;
+			m_cursorBackground = ConsoleColor.Black;
 
             m_systemInterconnect = systemInterconnect;
         }
@@ -44,7 +58,10 @@ namespace Virutal_Machine
 				{
 					if (packet[1] < (int)m_commandAddress)
 					{
-						m_charData[packet[1] - m_startAddress] = (char)packet[2];
+						int index = packet[1] - (int)m_startAddress; 
+						m_charData[index] = (char)packet[2];
+						m_foregroundColours[index] = m_cursorForeground;
+						m_backgroundColours[index] = m_cursorBackground;
 					}
 					else if (packet[1] == (int)m_commandAddress)
 					{
@@ -61,6 +78,14 @@ namespace Virutal_Machine
 							}break;
 						}
 					}
+					else if(packet[1] == (int)m_foregroundColourAddress)
+					{
+						m_cursorForeground = (ConsoleColor)packet[2];
+					}
+					else if (packet[1] == (int)m_backgroundColourAddress)
+					{
+						m_cursorBackground = (ConsoleColor)packet[2];
+					}
 				}
             }
         }
@@ -73,7 +98,10 @@ namespace Virutal_Machine
 			{
 				for(int x = 0; x < m_lineLength; x++)
 				{
-					Console.Write(m_charData[x + y * m_lineLength]);
+					int index = x + y * m_lineLength;
+					Console.ForegroundColor = m_foregroundColours[index];
+					Console.BackgroundColor = m_backgroundColours[index];
+					Console.Write(m_charData[index]);
 				}
 				Console.Write('\n');
 			}

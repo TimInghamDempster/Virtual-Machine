@@ -44,12 +44,16 @@ namespace Virutal_Machine
 										(int)UnitCodes.Interrupt	|	(int)InterruptInstructions.InterruptReturn		|	0 << 8	|	0,	0,										// Return to execution
 
 										// Write "Hello world"
-										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	26,										// Put string length into register 4
-										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	0,										// Put desired cursor pos into register 0
-										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromRegisterLocation	|	2 << 8	|	1,	(int)Program.biosStartAddress + 26,		// Load next char into register 2
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	(int)ConsoleColor.Blue,					// Put fgcolour into register 0
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	(int)ConsoleColor.Red,					// Put bgcolour into register 1
+										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayFgColourAddress,	// Set cursor fg colour.
+										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	1,	(int)Program.displayBkgColourAddress,	// Set cursor bg colour.
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	24,										// Put string length into register 0
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	0,										// Put desired cursor pos into register 1
+										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromRegisterLocation	|	2 << 8	|	1,	(int)Program.biosStartAddress + 34,		// Load next char into register 2
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToRegisterLocation	|	1 << 8	|	2,	(int)Program.displayStartAddress,		// Store char from register 2 to (display + register 1)
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment cursor/string pos
-										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpLess					|	1 << 8	|	0,	(int)Program.biosStartAddress + 14,		// Loop if not written enough characters
+										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpLess					|	1 << 8	|	0,	(int)Program.biosStartAddress + 22,		// Loop if not written enough characters
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	(int)DisplayCommands.Refresh,			// Set the screen refresh command into register 0
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayCommandAddress,		// Write refresh command to display command buffer.
 
