@@ -13,6 +13,7 @@ namespace Virutal_Machine
         static Display m_display;
         static PlatformControlHub m_PCH;
 		static VMKeyboard m_keyboard;
+		static RAM m_RAM;
         
         static InterconnectTerminal m_CPU_PCH_Interconnect = new InterconnectTerminal(1, 10);
         static InterconnectTerminal m_PCH_CPU_Interconnect = new InterconnectTerminal(1, 10);
@@ -25,6 +26,9 @@ namespace Virutal_Machine
 
 		static InterconnectTerminal m_PCH_Keyboard_Interconnect = new InterconnectTerminal(32, 10);
 		static InterconnectTerminal m_Keyboard_PCH_Interconnect = new InterconnectTerminal(32, 10);
+
+		static InterconnectTerminal m_CPU_RAM_Interconnect = new InterconnectTerminal(1, 10);
+		static InterconnectTerminal m_RAM_CPU_Interconnect = new InterconnectTerminal(1, 10);
 
 		public const uint PICAddress = 32;
 		public const uint PCHStartAddress = 512;
@@ -50,13 +54,18 @@ namespace Virutal_Machine
 			m_interconnects.Add(m_Display_PCH_Interconnect);
 			m_interconnects.Add(m_PCH_Keyboard_Interconnect);
 			m_interconnects.Add(m_Keyboard_PCH_Interconnect);
+			m_interconnects.Add(m_RAM_CPU_Interconnect);
+			m_interconnects.Add(m_CPU_RAM_Interconnect);
 
             m_CPU_PCH_Interconnect.SetOtherEnd(m_PCH_CPU_Interconnect);
             m_PCH_BIOS_Interconnect.SetOtherEnd(m_BIOS_PCH_Interconnect);
             m_PCH_Display_Interconnect.SetOtherEnd(m_Display_PCH_Interconnect);
 			m_PCH_Keyboard_Interconnect.SetOtherEnd(m_Keyboard_PCH_Interconnect);
+			m_RAM_CPU_Interconnect.SetOtherEnd(m_CPU_RAM_Interconnect);
 
-            m_cpu = new CPU(m_CPU_PCH_Interconnect);
+            m_cpu = new CPU(m_CPU_PCH_Interconnect, m_CPU_RAM_Interconnect);
+
+			m_RAM = new RAM();
 
             m_bios = new Bios(biosStartAddress, m_BIOS_PCH_Interconnect);
             m_display = new Display(displayStartAddress, m_Display_PCH_Interconnect);
@@ -74,9 +83,11 @@ namespace Virutal_Machine
 
                 m_cpu.Tick();
 
-                m_PCH.Tick();
-                m_bios.Tick();
+				m_RAM.Tick();
 
+                m_PCH.Tick();
+
+                m_bios.Tick();
 				m_display.Tick();
 
 				if(tickCount % 100000 == 0)

@@ -12,26 +12,23 @@ namespace Virutal_Machine
         Clock m_clock;
 		const uint NumCores = 1;
 		
-        InterconnectTerminal m_IOInterconnect;
 		List<InterconnectTerminal> m_coreUncoreInterconnects;
 		Uncore m_uncore;
 		InterruptController m_interruptController;
 		InterconnectTerminal m_PICUncoreInterconnect;
 		InterconnectTerminal m_uncorePICInterconenct;
 
-        public CPU(InterconnectTerminal IOInterconnect)
+        public CPU(InterconnectTerminal IOInterconnect, InterconnectTerminal RAMInterconnect)
         {
             m_clock = new Clock();
-
-            m_IOInterconnect = IOInterconnect;
-
+			
 			m_coreUncoreInterconnects = new List<InterconnectTerminal>();
 
 			m_PICUncoreInterconnect = new InterconnectTerminal(1,10);
 			m_uncorePICInterconenct = new InterconnectTerminal(1,10);
 			m_PICUncoreInterconnect.SetOtherEnd(m_uncorePICInterconenct);
 
-			m_uncore = new Uncore(m_IOInterconnect, m_uncorePICInterconenct);
+			m_uncore = new Uncore(IOInterconnect, m_uncorePICInterconenct, RAMInterconnect);
 			m_interruptController = new InterruptController(m_PICUncoreInterconnect);
 
             m_cores = new CPUCore[NumCores];

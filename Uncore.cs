@@ -11,8 +11,9 @@ namespace Virutal_Machine
 		private InterconnectTerminal m_IOInterconnect;
 		List<InterconnectTerminal> m_coreInterconencts;
 		InterconnectTerminal m_LPICInterconnenct;
+		InterconnectTerminal m_RAMInterconnect;
 
-		public Uncore(InterconnectTerminal IOInterconnect, InterconnectTerminal LPICInterconnenct)
+		public Uncore(InterconnectTerminal IOInterconnect, InterconnectTerminal LPICInterconnenct, InterconnectTerminal RAMInterconnect)
 		{
 			this.m_IOInterconnect = IOInterconnect;
 			m_LPICInterconnenct = LPICInterconnenct;
