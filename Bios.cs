@@ -46,13 +46,16 @@ namespace Virutal_Machine
 										// Write "Hello world"
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	24,										// Put string length into register 0
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	0,										// Put desired cursor pos into register 1
-										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromRegisterLocation	|	2 << 8	|	1,	(int)Program.biosStartAddress + 26,		// Load next char into register 2
+										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromRegisterLocation	|	5 << 8	|	1,	(int)Program.biosStartAddress + 30,		// Load next char into register 2
+										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToRegisterLocation	|	1 << 8	|	5,	(int)Program.RAMStartAddress,	// Store to RAM
+										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromRegisterLocation	|	2 << 8	|	1,	(int)Program.RAMStartAddress,	// Load from RAM
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToRegisterLocation	|	1 << 8	|	2,	(int)Program.displayStartAddress,		// Store char from register 2 to (display + register 1)
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment cursor/string pos
 										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpLess					|	1 << 8	|	0,	(int)Program.biosStartAddress + 14,		// Loop if not written enough characters
 										
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	(int)DisplayCommands.Refresh,			// Set the screen refresh command into register 0
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.displayCommandAddress,		// Write refresh command to display command buffer.
+										(int)UnitCodes.Branch		|	(int)BranchOperations.Break,0,
 
 										// Data section
 										// "hello what's your name?"

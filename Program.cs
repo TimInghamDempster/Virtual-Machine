@@ -68,7 +68,7 @@ namespace Virutal_Machine
 
             m_cpu = new CPU(m_CPU_PCH_Interconnect, m_CPU_RAM_Interconnect);
 
-			m_RAM = new RAM(m_RAM_CPU_Interconnect, (int)RAMSize);
+			m_RAM = new RAM(m_RAM_CPU_Interconnect, (int)RAMSize, RAMStartAddress);
 
             m_bios = new Bios(biosStartAddress, m_BIOS_PCH_Interconnect);
             m_display = new Display(displayStartAddress, m_Display_PCH_Interconnect);

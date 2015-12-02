@@ -19,10 +19,11 @@ namespace Virutal_Machine
 
 		const int CyclesPerAccess = 200; // assumes 0.1ms at 2.0GHz
 
-		public RAM(InterconnectTerminal CPUInterconnect, int size)
+		public RAM(InterconnectTerminal CPUInterconnect, int size, uint startAddress)
 		{
 			m_Data = new int[size];
 			m_cpuInterconnect = CPUInterconnect;
+			m_startAddress = startAddress;
 		}
 
 		public void Tick()
