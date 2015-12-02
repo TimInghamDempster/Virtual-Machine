@@ -15,8 +15,9 @@ namespace Virutal_Machine
 
 		public Uncore(InterconnectTerminal IOInterconnect, InterconnectTerminal LPICInterconnenct, InterconnectTerminal RAMInterconnect)
 		{
-			this.m_IOInterconnect = IOInterconnect;
+			m_IOInterconnect = IOInterconnect;
 			m_LPICInterconnenct = LPICInterconnenct;
+			m_RAMInterconnect = RAMInterconnect;
 			m_coreInterconencts = new List<InterconnectTerminal>();
 		}
 
@@ -41,20 +42,39 @@ namespace Virutal_Machine
 						forwarded = m_LPICInterconnenct.SendPacket(packet, packet.Length);
 					}
 					else if((packet[0] == (int) MessageType.Read ||
-						packet[0] == (int) MessageType.Write) &&
-						packet[1] < Program.PCHStartAddress)
-					{
-						forwarded = m_LPICInterconnenct.SendPacket(packet, packet.Length);
-					}
-					else
-					{
-						forwarded = m_IOInterconnect.SendPacket(packet, packet.Length);
+						packet[0] == (int) MessageType.Write))
+						{
+							if(	packet[1] < Program.PCHStartAddress)
+							{
+								forwarded = m_LPICInterconnenct.SendPacket(packet, packet.Length);
+							}
+							else if(packet[1] > Program.RAMStartAddress && packet[1] < Program.RAMStartAddress + Program.RAMSize)
+							{
+								forwarded = m_RAMInterconnect.SendPacket(packet, packet.Length);
+							}
+						else
+						{
+							forwarded = m_IOInterconnect.SendPacket(packet, packet.Length);
+						}
 					}
 
 					if(forwarded)
 					{
 						ic.ClearRecievedPacket();
 					}
+				}
+			}
+
+			if(m_RAMInterconnect.HasPacket)
+			{
+				int[] packet = new int[m_IOInterconnect.RecievedSize];
+				m_RAMInterconnect.ReadRecievedPacket(packet);
+
+				// Broadcast to all cores before attempting anything multicore.
+				bool forwarded = m_coreInterconencts[0].SendPacket(packet, packet.Length);
+				if (forwarded)
+				{
+					m_RAMInterconnect.ClearRecievedPacket();
 				}
 			}
 

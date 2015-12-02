@@ -61,7 +61,7 @@ namespace Virutal_Machine
 			m_coreId = id;
             m_instructionPointer = Program.biosStartAddress;
 			interruptController.AddCore(Interrupt);
-            m_registers = new int[10];
+            m_registers = new int[16];
             m_currentStage = PipelineStages.InstructionFetch;
             m_nextStage = PipelineStages.InstructionFetch;
             m_IOInterconnect = IOInterconnect;

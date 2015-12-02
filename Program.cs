@@ -39,6 +39,9 @@ namespace Virutal_Machine
 		public const uint displayBkgColourAddress = displayCommandAddress + 2;
 		public const uint keyboardStartAddress = displayCommandAddress + 4;
 		
+		public const uint RAMStartAddress = keyboardStartAddress + 1; // Keep this at the top of the memory space for organisational convenience.
+		public const uint RAMSize = 128 * 1024 * 1024; // 0.5GB
+		
 
 		static List<InterconnectTerminal> m_interconnects = new List<InterconnectTerminal>();
 
@@ -65,7 +68,7 @@ namespace Virutal_Machine
 
             m_cpu = new CPU(m_CPU_PCH_Interconnect, m_CPU_RAM_Interconnect);
 
-			m_RAM = new RAM();
+			m_RAM = new RAM(m_RAM_CPU_Interconnect, (int)RAMSize);
 
             m_bios = new Bios(biosStartAddress, m_BIOS_PCH_Interconnect);
             m_display = new Display(displayStartAddress, m_Display_PCH_Interconnect);
