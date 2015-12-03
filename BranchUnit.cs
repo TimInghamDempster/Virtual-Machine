@@ -9,12 +9,13 @@ namespace Virutal_Machine
 	enum BranchOperations
 	{
 		Nop,
-		Jump			= 1 << 16,
-		JumpNotEqual	= 2 << 16,
-		JumpEqual		= 3 << 16,
-		JumpLessEqual	= 4 << 16,
-		JumpLess		= 5 << 16,
-		Break			= 6 << 16
+		Jump = 1 << 16,
+		JumpNotEqual = 2 << 16,
+		JumpEqual = 3 << 16,
+		JumpLessEqual = 4 << 16,
+		JumpLess = 5 << 16,
+		Break = 6 << 16,
+		JumpRegister = 7 << 16,
 	}
 
 	class BranchUnit
@@ -47,6 +48,11 @@ namespace Virutal_Machine
 						case BranchOperations.Jump:
 							{
 								SetInstructionPointer((uint)m_currentOp[1]);
+								m_hasInstruction = false;
+							} break;
+						case BranchOperations.JumpRegister:
+							{
+								SetInstructionPointer((uint)m_registers[m_currentOp[0] & 0xff] + (uint)m_currentOp[1]);
 								m_hasInstruction = false;
 							} break;
 						case BranchOperations.JumpNotEqual:

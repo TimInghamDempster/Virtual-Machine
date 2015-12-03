@@ -48,7 +48,7 @@ namespace Virutal_Machine
 							{
 								forwarded = m_LPICInterconnenct.SendPacket(packet, packet.Length);
 							}
-							else if(packet[1] > Program.RAMStartAddress && packet[1] < Program.RAMStartAddress + Program.RAMSize)
+							else if(packet[1] >= Program.RAMStartAddress && packet[1] < Program.RAMStartAddress + Program.RAMSize)
 							{
 								forwarded = m_RAMInterconnect.SendPacket(packet, packet.Length);
 							}
