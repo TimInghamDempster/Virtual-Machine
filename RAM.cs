@@ -14,8 +14,10 @@ namespace Virutal_Machine
 		InterconnectTerminal m_cpuInterconnect;
 
 		bool m_sending;
+		bool m_storing;
 		int[] m_sendData;
 		int m_sendCountdown;
+		int m_storeCountdown;
 
 		const int CyclesPerAccess = 200; // assumes 0.1ms at 2.0GHz
 
@@ -34,7 +36,7 @@ namespace Virutal_Machine
 				m_cpuInterconnect.ReadRecievedPacket(packet);
 				m_cpuInterconnect.ClearRecievedPacket();
 
-				if (packet[0] == (int)MessageType.Read && !m_sending)
+				if (packet[0] == (int)MessageType.Read && !m_sending  && !m_storing)
 				{
 					uint localAddress = (uint)packet[1] - m_startAddress;
 					int readLength = packet[2];
@@ -53,7 +55,7 @@ namespace Virutal_Machine
 
 					m_sendCountdown = CyclesPerAccess;
 				}
-				else if(packet[0] == (int)MessageType.Write)
+				else if (packet[0] == (int)MessageType.Write && !m_sending && !m_storing)
 				{
 					uint localAddress = (uint)packet[1] - m_startAddress;
 
@@ -61,6 +63,21 @@ namespace Virutal_Machine
 					{
 						m_Data[localAddress] = packet[2];
 					}
+
+					m_storing = true;
+					m_storeCountdown = CyclesPerAccess;
+				}
+			}
+
+			if(m_storing)
+			{
+				if(m_storeCountdown > 0)
+				{
+					m_storeCountdown--;
+				}
+				else
+				{
+					m_storing = false;
 				}
 			}
 
