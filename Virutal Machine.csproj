@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="ArithmeticLogicUnit.cs" />
     <Compile Include="Bios.cs" />
+    <Compile Include="BlockDevice.cs" />
     <Compile Include="BranchUnit.cs" />
     <Compile Include="Clock.cs" />
     <Compile Include="InterconnectTerminal.cs" />
