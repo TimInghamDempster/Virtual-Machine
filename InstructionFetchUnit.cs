@@ -80,6 +80,10 @@ namespace Virutal_Machine
 								m_CPUCore.NextStage = PipelineStages.InstructionDispatch;
 							}
 						}
+						else
+						{
+							Program.Counters.FetchWaits++;
+						}
 					}
 				}
 			}
@@ -100,6 +104,10 @@ namespace Virutal_Machine
 						{
 							m_interruptPhase = InterruptPhase.WaitForId;
 						}
+						else
+						{
+							Program.Counters.InterruptWaits++;
+						}
 					}break;
 					case InterruptPhase.WaitForId:
 					{
@@ -111,6 +119,10 @@ namespace Virutal_Machine
 							m_IOInterconnect.ClearRecievedPacket();
 							m_interruptId = receivedPacket[1];
 							m_interruptPhase = InterruptPhase.RequestInterruptPointer;
+						}
+						else
+						{
+							Program.Counters.InterruptWaits++;
 						}
 					}break;
 					case InterruptPhase.RequestInterruptPointer:
@@ -125,6 +137,10 @@ namespace Virutal_Machine
 						if (requestSent)
 						{
 							m_interruptPhase = InterruptPhase.WaitForInterruptPointer;
+						}
+						else
+						{
+							Program.Counters.InterruptWaits++;
 						}
 					}break;
 					case InterruptPhase.WaitForInterruptPointer:
@@ -146,6 +162,10 @@ namespace Virutal_Machine
 
 							m_interruptPhase = InterruptPhase.RequestId;
 							m_startInterrupt = false;
+						}
+						else
+						{
+							Program.Counters.InterruptWaits++;
 						}
 					}break;
 				}

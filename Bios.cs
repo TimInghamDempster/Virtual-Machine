@@ -28,7 +28,7 @@ namespace Virutal_Machine
 
 		public Bios(uint startAddress, InterconnectTerminal systemInterconnect)
 		{
-			const int dataSectionStart = 172;
+			const int dataSectionStart = 176;
 			m_systemInterconnect = systemInterconnect;
 			m_startAddress = startAddress;
 			m_sending = false;
@@ -101,11 +101,13 @@ namespace Virutal_Machine
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	3 << 8	|	0,	(int)Program.biosStartAddress + 92,		// Set return pointer
 										(int)UnitCodes.Branch		|	(int)BranchOperations.Jump						|	0 << 8	|	0,	(int)Program.biosStartAddress + 18,		// Jumpt to string writing function
 
+										(int)UnitCodes.Branch		|	(int)BranchOperations.Break						|	0 << 8	|	0,	0,										// Break to gather stats
+
 										// Draw second query string
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	0 << 8	|	0,	5,										// Put string length into register 0
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	1 << 8	|	0,	237,									// Put desired cursor pos into register 1
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2 << 8	|	0,	(int)Program.biosStartAddress + dataSectionStart + 45,	// Put desired string pos into register
-										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	3 << 8	|	0,	(int)Program.biosStartAddress + 102,	// Set return pointer
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	3 << 8	|	0,	(int)Program.biosStartAddress + 104,	// Set return pointer
 										(int)UnitCodes.Branch		|	(int)BranchOperations.Jump						|	0 << 8	|	0,	(int)Program.biosStartAddress + 18,		// Jumpt to string writing function
 
 										// Load name from ssd
@@ -119,7 +121,7 @@ namespace Virutal_Machine
 										
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment RAM pointer
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	2 << 8	|	2,	1,										// Increment string length
-										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpNotEqual				|	0 << 8	|	3,	(int)Program.biosStartAddress + 112,	// Jump back for the next character if current one not null
+										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpNotEqual				|	0 << 8	|	3,	(int)Program.biosStartAddress + 114,	// Jump back for the next character if current one not null
 
 										// Write second name to display
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	0 << 8	|	2,	0,										// Copy string length from register 2 to register 0
@@ -127,7 +129,7 @@ namespace Virutal_Machine
 										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromLiteralLocation		|	2 << 8	|	0,	(int)Program.RAMStartAddress,			// Set string pos to end of first string in ram
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	2 << 8	|	2,	1,										// Move string pos to start of second string in ram
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	2 << 8	|	2,	(int)Program.RAMStartAddress,			// Add location of RAM to string start address
-										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	3 << 8	|	0,	(int)Program.biosStartAddress + 136,	// Set return pointer
+										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	3 << 8	|	0,	(int)Program.biosStartAddress + 138,	// Set return pointer
 										(int)UnitCodes.Branch		|	(int)BranchOperations.Jump						|	0 << 8	|	0,	(int)Program.biosStartAddress + 18,		// Jumpt to string writing function
 
 										// Write question mark
@@ -149,9 +151,11 @@ namespace Virutal_Machine
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	3,	(int)Program.SSDFIFOAddress,			// Store char to fifo
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	2 << 8	|	2,	1,										// Increment char pointer
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	4 << 8	|	4,	1,										// Increment char count
-										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpLess					|	4 << 8	|	1,	(int)Program.biosStartAddress + 158,	// Loop back for next char
+										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpLess					|	4 << 8	|	1,	(int)Program.biosStartAddress + 160,	// Loop back for next char
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.SSDFIFOAddress,			// Send a terminating null
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.SSDSeekAddress,			// Flush the block
+
+										(int)UnitCodes.Branch		|	(int)BranchOperations.Break						|	0 << 8	|	0,	0,										// Break at program end
 
 										// Data section
 										// "hello, what's your name?"

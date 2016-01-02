@@ -52,7 +52,12 @@ namespace Virutal_Machine
                             {
 								m_hasInstruction = false;
                                 m_CPUCore.NextStage = PipelineStages.BranchPredict;
+								Program.Counters.InstructionsExecuted++;
                             }
+							else
+							{
+								Program.Counters.StoreWaits++;
+							}
                         }
                         break;
                     case StoreOperations.StoreToLiteralLocation:
@@ -70,7 +75,12 @@ namespace Virutal_Machine
                             {
 								m_hasInstruction = false;
                                 m_CPUCore.NextStage = PipelineStages.BranchPredict;
+								Program.Counters.InstructionsExecuted++;
                             }
+							else
+							{
+								Program.Counters.StoreWaits++;
+							}
                         }
                         break;
                 }

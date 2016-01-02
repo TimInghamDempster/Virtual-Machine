@@ -96,6 +96,11 @@ namespace Virutal_Machine
 				m_registers[(m_currentInstruction[0] >> 8) & 0x000000ff] = recivedPacket[1];
 
 				m_CPUCore.NextStage = PipelineStages.BranchPredict;
+				Program.Counters.InstructionsExecuted++;
+			}
+			else
+			{
+				Program.Counters.LoadWaits++;
 			}
 		}
 

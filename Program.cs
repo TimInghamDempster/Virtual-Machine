@@ -6,6 +6,15 @@ using System.Threading.Tasks;
 
 namespace Virutal_Machine
 {
+	struct StatsCounters
+	{
+		public int InstructionsExecuted;
+		public int LoadWaits;
+		public int StoreWaits;
+		public int FetchWaits;
+		public int InterruptWaits;
+	}
+
     class Program
     {
         static CPU m_cpu;
@@ -53,6 +62,8 @@ namespace Virutal_Machine
 		static List<InterconnectTerminal> m_interconnects = new List<InterconnectTerminal>();
 
         static uint tickCount;
+
+		public static StatsCounters Counters;
 
         static void Main(string[] args)
         {

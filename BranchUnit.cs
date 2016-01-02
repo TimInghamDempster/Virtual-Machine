@@ -122,6 +122,7 @@ namespace Virutal_Machine
 								m_hasInstruction = false;
 							}break;
 					}
+					Program.Counters.InstructionsExecuted++;
 				}
 				else
 				{

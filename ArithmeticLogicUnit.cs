@@ -74,6 +74,7 @@ namespace Virutal_Machine
 				}
 				m_hasInstruction = false;
 				m_CPUCore.NextStage = PipelineStages.BranchPredict;
+				Program.Counters.InstructionsExecuted++;
 			}
 		}
 
