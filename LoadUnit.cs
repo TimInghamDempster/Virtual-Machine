@@ -63,7 +63,7 @@ namespace Virutal_Machine
 							{
 								int[] newPacket = new int[3];
 								newPacket[0] = (int)MessageType.Read;
-								newPacket[1] = (m_currentInstruction[0] & 0x000000ff) + m_currentInstruction[1];
+								newPacket[1] = m_currentInstruction[1];
 								newPacket[2] = 1;
 
 								bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
