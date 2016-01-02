@@ -33,10 +33,6 @@ namespace Virutal_Machine
                 m_cpuTerminal.ReadRecievedPacket(packet);
 
                 uint destAddress = (uint)packet[1];
-                if (destAddress > m_deviceAddresses[m_deviceAddresses.Count - 1])
-                {
-                    m_cpuTerminal.ClearRecievedPacket();
-                }
 
                 for (int i = 0; i < m_deviceTerminals.Count; i++)
                 {
