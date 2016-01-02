@@ -14,6 +14,7 @@ namespace Virutal_Machine
         static PlatformControlHub m_PCH;
 		static VMKeyboard m_keyboard;
 		static RAM m_RAM;
+		static BlockDevice m_SSD;
         
         static InterconnectTerminal m_CPU_PCH_Interconnect = new InterconnectTerminal(1, 10);
         static InterconnectTerminal m_PCH_CPU_Interconnect = new InterconnectTerminal(1, 10);
@@ -30,6 +31,9 @@ namespace Virutal_Machine
 		static InterconnectTerminal m_CPU_RAM_Interconnect = new InterconnectTerminal(1, 10);
 		static InterconnectTerminal m_RAM_CPU_Interconnect = new InterconnectTerminal(1, 10);
 
+		static InterconnectTerminal m_PCH_SSD_Interconnect = new InterconnectTerminal(32, 10);
+		static InterconnectTerminal m_SSD_PCH_Interconnect = new InterconnectTerminal(32, 10);
+
 		public const uint PICAddress = 32;
 		public const uint PCHStartAddress = 512;
         public const uint biosStartAddress = PCHStartAddress;
@@ -41,7 +45,10 @@ namespace Virutal_Machine
 		
 		public const uint RAMStartAddress = keyboardStartAddress + 1; // Keep this at the top of the memory space for organisational convenience.
 		public const uint RAMSize = 128 * 1024 * 1024; // 0.5GB
-		
+
+		public const uint SSDSeekAddress = RAMStartAddress + RAMSize;
+		public const uint SSDFIFOAddress = SSDSeekAddress + 1;
+		public const uint SSDInterruptAcknowledgeAddress = SSDFIFOAddress + 1;
 
 		static List<InterconnectTerminal> m_interconnects = new List<InterconnectTerminal>();
 
@@ -59,12 +66,15 @@ namespace Virutal_Machine
 			m_interconnects.Add(m_Keyboard_PCH_Interconnect);
 			m_interconnects.Add(m_RAM_CPU_Interconnect);
 			m_interconnects.Add(m_CPU_RAM_Interconnect);
+			m_interconnects.Add(m_SSD_PCH_Interconnect);
+			m_interconnects.Add(m_PCH_SSD_Interconnect);
 
             m_CPU_PCH_Interconnect.SetOtherEnd(m_PCH_CPU_Interconnect);
             m_PCH_BIOS_Interconnect.SetOtherEnd(m_BIOS_PCH_Interconnect);
             m_PCH_Display_Interconnect.SetOtherEnd(m_Display_PCH_Interconnect);
 			m_PCH_Keyboard_Interconnect.SetOtherEnd(m_Keyboard_PCH_Interconnect);
 			m_RAM_CPU_Interconnect.SetOtherEnd(m_CPU_RAM_Interconnect);
+			m_PCH_SSD_Interconnect.SetOtherEnd(m_SSD_PCH_Interconnect);
 
             m_cpu = new CPU(m_CPU_PCH_Interconnect, m_CPU_RAM_Interconnect);
 
@@ -73,12 +83,14 @@ namespace Virutal_Machine
             m_bios = new Bios(biosStartAddress, m_BIOS_PCH_Interconnect);
             m_display = new Display(displayStartAddress, m_Display_PCH_Interconnect);
 			m_keyboard = new VMKeyboard(m_Keyboard_PCH_Interconnect);
+			m_SSD = new BlockDevice((int)SSDSeekAddress, m_SSD_PCH_Interconnect, @"MainDrive", 1024 * 1024, 200000, 1); // 4GB, 0.1ms seek time
 
             m_PCH = new PlatformControlHub(m_PCH_CPU_Interconnect, PCHStartAddress);
 
             m_PCH.AddDevice(m_PCH_BIOS_Interconnect, biosStartAddress);
             m_PCH.AddDevice(m_PCH_Display_Interconnect, displayStartAddress);
 			m_PCH.AddDevice(m_PCH_Keyboard_Interconnect, keyboardStartAddress);
+			m_PCH.AddDevice(m_PCH_SSD_Interconnect, SSDSeekAddress);
 
             while (true)
             {
@@ -92,6 +104,7 @@ namespace Virutal_Machine
 
                 m_bios.Tick();
 				m_display.Tick();
+				m_SSD.Tick();
 
 				if(tickCount % 100000 == 0)
 				{
