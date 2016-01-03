@@ -56,7 +56,13 @@ namespace Virutal_Machine
 
 				if(!instructionInQueue)
 				{
+					Program.Counters.FetchWaits++;
+					Program.Counters.ICacheMisses++;
 					return;
+				}
+				else
+				{
+					Program.Counters.ICacheHits++;
 				}
 
 				if ((currentInstruction[0] & 0xff000000) == (int)UnitCodes.Interrupt

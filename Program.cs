@@ -13,6 +13,8 @@ namespace Virutal_Machine
 		public int StoreWaits;
 		public int FetchWaits;
 		public int InterruptWaits;
+		public int ICacheHits;
+		public int ICacheMisses;
 	}
 
     class Program

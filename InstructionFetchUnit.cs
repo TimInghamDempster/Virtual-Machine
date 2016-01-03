@@ -61,20 +61,21 @@ namespace Virutal_Machine
 		{
 			if (!m_startInterrupt)
 			{
+				bool foundCurrentInstruction = false;
+				while(m_instructionQueue.instructions.Count > 0 && foundCurrentInstruction == false)
+				{
+					if(m_instructionQueue.instructions.Peek().address != m_CPUCore.InstructionPointer)
+					{
+						m_instructionQueue.instructions.Dequeue();
+					}
+					else
+					{
+						foundCurrentInstruction = true;
+					}
+				}
+
 				if (m_waitingForMemory == false)
 				{
-					bool foundCurrentInstruction = false;
-					while(m_instructionQueue.instructions.Count > 0 && foundCurrentInstruction == false)
-					{
-						if(m_instructionQueue.instructions.Peek().address != m_CPUCore.InstructionPointer)
-						{
-							m_instructionQueue.instructions.Dequeue();
-						}
-						else
-						{
-							foundCurrentInstruction = true;
-						}
-					}
 					if(!foundCurrentInstruction)
 					{
 						int[] newPacket = new int[3];
@@ -122,10 +123,6 @@ namespace Virutal_Machine
 							m_waitingForMemory = false;
 							m_IOInterconnect.ClearRecievedPacket();
 						}
-					}
-					else
-					{
-						Program.Counters.FetchWaits++;
 					}
 				}
 			}
