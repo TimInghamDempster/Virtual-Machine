@@ -16,7 +16,7 @@ namespace Virutal_Machine
 		int[] m_sendData;
 		int m_sendCountdown;
 
-		const int CyclesPerAccess = 2000; // assumes 1ms at 2.0GHz
+		const int CyclesPerAccess = 200; // assumes 1ms at 2.0GHz
 
 		public uint Size
 		{
@@ -115,10 +115,10 @@ namespace Virutal_Machine
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToLiteralLocation		|	0 << 8	|	0,	(int)Program.SSDSeekAddress,			// Set storage to address in register 0
 										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromLiteralLocation		|	1 << 8	|	0,	(int)Program.RAMStartAddress,			// Load existing space used in memory
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Move to next free slot in memory
+										
 										(int)UnitCodes.ALU			|	(int)ALUOperations.SetLiteral					|	2 << 8	|	2,	0,										// Initialise register 2 as length counter
 										(int)UnitCodes.Load			|	(int)LoadOperations.LoadFromLiteralLocation		|	3 << 8	|	0,	(int)Program.SSDFIFOAddress,			// Load a value from SSD into register 3
 										(int)UnitCodes.Store		|	(int)StoreOperations.StoreToRegisterLocation	|	1 << 8	|	3,	(int)Program.RAMStartAddress,			// Store value to location in RAM
-										
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	1 << 8	|	1,	1,										// Increment RAM pointer
 										(int)UnitCodes.ALU			|	(int)ALUOperations.AddLiteral					|	2 << 8	|	2,	1,										// Increment string length
 										(int)UnitCodes.Branch		|	(int)BranchOperations.JumpNotEqual				|	0 << 8	|	3,	(int)Program.biosStartAddress + 114,	// Jump back for the next character if current one not null
@@ -229,26 +229,34 @@ namespace Virutal_Machine
 			{
 				int[] packet = new int[3];
 				m_systemInterconnect.ReadRecievedPacket(packet);
-				m_systemInterconnect.ClearRecievedPacket();
 
-				if(packet[0] == (int)MessageType.Read && !m_sending)
+				if(packet[0] == (int)MessageType.Read)
 				{
-					uint localAddress = (uint)packet[1] - m_startAddress;
-					int readLength = packet[2];
-
-					m_sending = true;
-					m_sendData = new int[readLength + 1];
-
-					if (localAddress < m_biosData.Count() - (readLength - 1))
+					if(!m_sending)
 					{
-						for (int i = 0; i < readLength; i++)
-						{
-							m_sendData[i + 1] = m_biosData[localAddress + i];
-						}
-					}
-					m_sendData[0] = (int)MessageType.Response;
+						m_systemInterconnect.ClearRecievedPacket();
+						uint localAddress = (uint)packet[1] - m_startAddress;
+						int readLength = packet[2];
 
-					m_sendCountdown = CyclesPerAccess;
+						m_sending = true;
+						m_sendData = new int[readLength + 2];
+
+						if (localAddress < m_biosData.Count() - (readLength - 1))
+						{
+							for (int i = 0; i < readLength; i++)
+							{
+								m_sendData[i + 2] = m_biosData[localAddress + i];
+							}
+						}
+						m_sendData[0] = (int)MessageType.Response;
+						m_sendData[1] = packet[1];
+
+						m_sendCountdown = CyclesPerAccess;
+					}
+				}
+				else
+				{
+					m_systemInterconnect.ClearRecievedPacket();
 				}
 			}
 

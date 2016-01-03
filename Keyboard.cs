@@ -65,9 +65,10 @@ namespace Virutal_Machine
 
 			if(m_isSendingKey)
 			{
-				int[] buffer = new int[2];
+				int[] buffer = new int[3];
 				buffer[0] = (int)MessageType.Response;
-				buffer[1] = m_currentKey;
+				buffer[1] = (int)Program.keyboardStartAddress;
+				buffer[2] = m_currentKey;
 
 				bool sent = m_systemInterconnect.SendPacket(buffer, buffer.Count());
 

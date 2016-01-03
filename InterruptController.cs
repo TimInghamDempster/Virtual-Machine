@@ -59,10 +59,11 @@ namespace Virutal_Machine
 					int register = packet[1] - m_startAddress;
 
 					m_sending = true;
-					m_sendData = new int[2];
+					m_sendData = new int[3];
 
 					m_sendData[0] = (int)MessageType.Response;
-					m_sendData[1] = (int)m_interruptVector[register];
+					m_sendData[1] = packet[1];
+					m_sendData[2] = (int)m_interruptVector[register];
 				}
 			}
 

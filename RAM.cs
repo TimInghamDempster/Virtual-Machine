@@ -42,16 +42,17 @@ namespace Virutal_Machine
 					int readLength = packet[2];
 
 					m_sending = true;
-					m_sendData = new int[readLength + 1];
+					m_sendData = new int[readLength + 2];
 
 					if (localAddress < m_Data.Count() - (readLength - 1))
 					{
 						for (int i = 0; i < readLength; i++)
 						{
-							m_sendData[i + 1] = m_Data[localAddress + i];
+							m_sendData[i + 2] = m_Data[localAddress + i];
 						}
 					}
 					m_sendData[0] = (int)MessageType.Response;
+					m_sendData[1] = packet[1];
 
 					m_sendCountdown = CyclesPerAccess;
 				}

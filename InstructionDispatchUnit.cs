@@ -15,61 +15,87 @@ namespace Virutal_Machine
 		LoadUnit m_loadUnit;
 		StoreUnit m_storeUnit;
 
-		int[] m_currentInstruction;
+		InstructionFetchUnit m_fetchUnit;
+
+		Action EndInterrupt;
 
 		public InstructionDispatchUnit(CPUCore cPUCore,
 			BranchUnit branchUnit,
 			ArithmeticLogicUnit ALU,
 			LoadUnit loadUnit,
-			StoreUnit storeUnit)
+			StoreUnit storeUnit,
+			InstructionFetchUnit fetchUnit, 
+			Action endInterrupt)
 		{
 			m_CPUCore = cPUCore;
 			m_branchUnit = branchUnit;
 			m_ALU = ALU;
 			m_loadUnit = loadUnit;
 			m_storeUnit = storeUnit;
+			m_fetchUnit = fetchUnit;
+			EndInterrupt = endInterrupt;
 		}
 
 		public void Tick()
 		{
 			if (m_CPUCore.CurrentStage == PipelineStages.InstructionDispatch)
 			{
-				UnitCodes executionUnitCode = (UnitCodes)(m_currentInstruction[0] & 0xff000000);
+				int[] currentInstruction = new int[2];
+				bool instructionInQueue = false;
+
+				foreach(Instruction inst in m_fetchUnit.m_instructionQueue.instructions)
+				{
+					if(inst.address == m_CPUCore.InstructionPointer)
+					{
+						currentInstruction[0] = inst.part1;
+						currentInstruction[1] = inst.part2;
+						instructionInQueue = true;
+						break;
+					}
+				}
+
+				if(!instructionInQueue)
+				{
+					return;
+				}
+
+				if ((currentInstruction[0] & 0xff000000) == (int)UnitCodes.Interrupt
+							&& (currentInstruction[0] & 0x00ff0000) == (int)InterruptInstructions.InterruptReturn)
+				{
+					EndInterrupt();
+				}
+
+				UnitCodes executionUnitCode = (UnitCodes)(currentInstruction[0] & 0xff000000);
 				switch (executionUnitCode)
 				{
 					case UnitCodes.ALU:
 						{
-							m_ALU.SetInstruction(m_currentInstruction);
+							m_ALU.SetInstruction(currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
 					case UnitCodes.Load:
 						{
-							m_loadUnit.SetInstruction(m_currentInstruction);
+							m_loadUnit.SetInstruction(currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
 					case UnitCodes.Store:
 						{
-							m_storeUnit.SetInstruction(m_currentInstruction);
+							m_storeUnit.SetInstruction(currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.Execution;
 						} break;
 					case UnitCodes.Branch:
 						{
-							m_branchUnit.SetInstruction(m_currentInstruction);
+							m_branchUnit.SetInstruction(currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.BranchPredict;
 						} break;
 					case UnitCodes.Nop:
 						{
 							// Do we want to fetch here or move the isntruction pointer?
 							// Almost certainly in an invalid state anyway so no correct answer.
-							m_CPUCore.NextStage = PipelineStages.InstructionFetch;
+							m_CPUCore.NextStage = PipelineStages.InstructionDispatch;
 						}break;
 				}
 			}
-		}
-
-		public void SetInstruction(int[] instruction)
-		{
-			m_currentInstruction = instruction;
 		}
 	}
 }

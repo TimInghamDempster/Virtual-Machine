@@ -14,13 +14,29 @@ namespace Virutal_Machine
 		WaitForInterruptPointer
 	}
 
-    class InstructionFetchUnit
-    {
-        CPUCore m_CPUCore;
-        InstructionDispatchUnit m_dispatchUnit;
-        InterconnectTerminal m_IOInterconnect;
+	struct Instruction
+	{
+		public int address;
+		public int part1;
+		public int part2;
+	}
 
-        bool m_waitingForMemory;
+	class InstructionBlock
+	{
+		public Queue<Instruction> instructions;
+
+		public InstructionBlock()
+		{
+			instructions = new Queue<Instruction>();
+		}
+	}
+
+	class InstructionFetchUnit
+	{
+		CPUCore m_CPUCore;
+		InterconnectTerminal m_IOInterconnect;
+
+		bool m_waitingForMemory;
 		bool m_startInterrupt;
 
 		InterruptPhase m_interruptPhase;
@@ -28,153 +44,190 @@ namespace Virutal_Machine
 
 		Action EndInterrupt;
 
-        public InstructionFetchUnit(CPUCore cPUCore, InterconnectTerminal IOInterconnect, InstructionDispatchUnit dispatchUnit, Action endInterrupt)
-        {
-            m_CPUCore = cPUCore;
-            m_IOInterconnect = IOInterconnect;
-            m_dispatchUnit = dispatchUnit;
-            m_waitingForMemory = false;
-			EndInterrupt = endInterrupt;
-        }
+		public InstructionBlock m_instructionQueue;
 
-        public void Tick()
-        {
-			if(!m_startInterrupt)
+		int m_pendingAddress;
+
+		public InstructionFetchUnit(CPUCore cPUCore, InterconnectTerminal IOInterconnect, Action endInterrupt)
+		{
+			m_CPUCore = cPUCore;
+			m_IOInterconnect = IOInterconnect;
+			m_waitingForMemory = false;
+			EndInterrupt = endInterrupt;
+			m_instructionQueue = new InstructionBlock();
+		}
+
+		public void Tick()
+		{
+			if (!m_startInterrupt)
 			{
-				if (m_CPUCore.CurrentStage == PipelineStages.InstructionFetch)
-				{                
-					if (m_waitingForMemory == false)
+				if (m_waitingForMemory == false)
+				{
+					bool foundCurrentInstruction = false;
+					while(m_instructionQueue.instructions.Count > 0 && foundCurrentInstruction == false)
+					{
+						if(m_instructionQueue.instructions.Peek().address != m_CPUCore.InstructionPointer)
+						{
+							m_instructionQueue.instructions.Dequeue();
+						}
+						else
+						{
+							foundCurrentInstruction = true;
+						}
+					}
+					if(!foundCurrentInstruction)
 					{
 						int[] newPacket = new int[3];
 						newPacket[0] = (int)MessageType.Read;
 						newPacket[1] = (int)m_CPUCore.InstructionPointer;
 						newPacket[2] = 2;
-                    
-						bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
-
-						if(requestSent)
-						{
-							m_waitingForMemory = true;
-						}
-					}
-					else
-					{
-						if(m_IOInterconnect.HasPacket)
-						{
-							int[] receivedPacket = new int[m_IOInterconnect.RecievedSize];
-							m_IOInterconnect.ReadRecievedPacket(receivedPacket);
-
-							m_IOInterconnect.ClearRecievedPacket();
-
-							if ((receivedPacket[1] & 0xff000000) == (int)UnitCodes.Interrupt
-								&& (receivedPacket[1] & 0x00ff0000) == (int)InterruptInstructions.InterruptReturn)
-							{
-								EndInterrupt();
-								m_waitingForMemory = false;
-							}
-							else
-							{
-								int[] m_instruction = new int[] { receivedPacket[1], receivedPacket[2] };
-								m_dispatchUnit.SetInstruction(m_instruction);
-								m_waitingForMemory = false;
-								m_CPUCore.NextStage = PipelineStages.InstructionDispatch;
-							}
-						}
-						else
-						{
-							Program.Counters.FetchWaits++;
-						}
-					}
-				}
-			}
-			else
-			{
-				switch(m_interruptPhase)
-				{
-					case InterruptPhase.RequestId:
-					{
-						int[] newPacket = new int[3];
-						newPacket[0] = (int)MessageType.Read;
-						newPacket[1] = (int)InterruptController.InterruptRegisterAddress;
-						newPacket[2] = 1;
-                    
-						bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
-
-						if(requestSent)
-						{
-							m_interruptPhase = InterruptPhase.WaitForId;
-						}
-						else
-						{
-							Program.Counters.InterruptWaits++;
-						}
-					}break;
-					case InterruptPhase.WaitForId:
-					{
-						if (m_IOInterconnect.HasPacket)
-						{
-							int[] receivedPacket = new int[m_IOInterconnect.RecievedSize];
-							m_IOInterconnect.ReadRecievedPacket(receivedPacket);
-
-							m_IOInterconnect.ClearRecievedPacket();
-							m_interruptId = receivedPacket[1];
-							m_interruptPhase = InterruptPhase.RequestInterruptPointer;
-						}
-						else
-						{
-							Program.Counters.InterruptWaits++;
-						}
-					}break;
-					case InterruptPhase.RequestInterruptPointer:
-					{
-						int[] newPacket = new int[3];
-						newPacket[0] = (int)MessageType.Read;
-						newPacket[1] = m_interruptId;
-						newPacket[2] = 1;
 
 						bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
 
 						if (requestSent)
 						{
-							m_interruptPhase = InterruptPhase.WaitForInterruptPointer;
+							m_pendingAddress = (int)m_CPUCore.InstructionPointer;
+							m_waitingForMemory = true;
 						}
-						else
-						{
-							Program.Counters.InterruptWaits++;
-						}
-					}break;
-					case InterruptPhase.WaitForInterruptPointer:
+					}
+					else
 					{
-						if (m_IOInterconnect.HasPacket)
+						if(m_instructionQueue.instructions.Count < 4)
 						{
-							int[] receivedPacket = new int[m_IOInterconnect.RecievedSize];
-							m_IOInterconnect.ReadRecievedPacket(receivedPacket);
+							int[] newPacket = new int[3];
+							newPacket[0] = (int)MessageType.Read;
+							newPacket[1] = m_instructionQueue.instructions.Last().address + 2;
+							newPacket[2] = 2;
 
+							bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
+
+							if (requestSent)
+							{
+								m_pendingAddress = m_instructionQueue.instructions.Last().address + 2;
+								m_waitingForMemory = true;
+							}
+						}
+					}
+				}
+				else
+				{
+					if (m_IOInterconnect.HasPacket)
+					{
+						int[] receivedPacket = new int[m_IOInterconnect.RecievedSize];
+						m_IOInterconnect.ReadRecievedPacket(receivedPacket);
+
+						if(receivedPacket[0] == (int)MessageType.Response && receivedPacket[1] == m_pendingAddress)
+						{
+							m_instructionQueue.instructions.Enqueue(new Instruction() { address = m_pendingAddress, part1 = receivedPacket[2], part2 = receivedPacket[3]});
+							m_waitingForMemory = false;
 							m_IOInterconnect.ClearRecievedPacket();
-							int handlerLocation = receivedPacket[1];
-
-							int[] newInstruction = new int[2];
-							newInstruction[0] = (int)UnitCodes.Branch | (int)BranchOperations.Jump;
-							newInstruction[1] = handlerLocation;
-
-							m_dispatchUnit.SetInstruction(newInstruction);
-							m_CPUCore.NextStage = PipelineStages.InstructionDispatch;
-
-							m_interruptPhase = InterruptPhase.RequestId;
-							m_startInterrupt = false;
 						}
-						else
-						{
-							Program.Counters.InterruptWaits++;
-						}
-					}break;
+					}
+					else
+					{
+						Program.Counters.FetchWaits++;
+					}
 				}
 			}
-        }
+			else
+			{
+				switch (m_interruptPhase)
+				{
+					case InterruptPhase.RequestId:
+						{
+							int[] newPacket = new int[3];
+							newPacket[0] = (int)MessageType.Read;
+							newPacket[1] = (int)InterruptController.InterruptRegisterAddress;
+							newPacket[2] = 1;
+
+							bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
+
+							if (requestSent)
+							{
+								m_interruptPhase = InterruptPhase.WaitForId;
+							}
+							else
+							{
+								Program.Counters.InterruptWaits++;
+							}
+						} break;
+					case InterruptPhase.WaitForId:
+						{
+							if (m_IOInterconnect.HasPacket)
+							{
+								int[] receivedPacket = new int[m_IOInterconnect.RecievedSize];
+								m_IOInterconnect.ReadRecievedPacket(receivedPacket);
+
+								if(receivedPacket[0] == (int)MessageType.Response && receivedPacket[1] == (int)InterruptController.InterruptRegisterAddress)
+								{
+									m_IOInterconnect.ClearRecievedPacket();
+									m_interruptId = receivedPacket[2];
+									m_interruptPhase = InterruptPhase.RequestInterruptPointer;
+								}
+							}
+							else
+							{
+								Program.Counters.InterruptWaits++;
+							}
+						} break;
+					case InterruptPhase.RequestInterruptPointer:
+						{
+							int[] newPacket = new int[3];
+							newPacket[0] = (int)MessageType.Read;
+							newPacket[1] = m_interruptId;
+							newPacket[2] = 1;
+
+							bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
+
+							if (requestSent)
+							{
+								m_interruptPhase = InterruptPhase.WaitForInterruptPointer;
+							}
+							else
+							{
+								Program.Counters.InterruptWaits++;
+							}
+						} break;
+					case InterruptPhase.WaitForInterruptPointer:
+						{
+							if (m_IOInterconnect.HasPacket)
+							{
+								int[] receivedPacket = new int[m_IOInterconnect.RecievedSize];
+								m_IOInterconnect.ReadRecievedPacket(receivedPacket);
+								
+								if(receivedPacket[0] == (int)MessageType.Response && receivedPacket[1] == m_interruptId)
+								{
+									m_IOInterconnect.ClearRecievedPacket();
+									int handlerLocation = receivedPacket[2];
+
+									Instruction newInstruction = new Instruction()
+									{
+										address = (int)m_CPUCore.InstructionPointer,
+										part1 =(int)UnitCodes.Branch | (int)BranchOperations.Jump,
+										part2 = handlerLocation
+									};
+
+									m_instructionQueue.instructions.Enqueue(newInstruction);
+
+									m_CPUCore.NextStage = PipelineStages.InstructionDispatch;
+
+									m_interruptPhase = InterruptPhase.RequestId;
+									m_startInterrupt = false;
+								}
+							}
+							else
+							{
+								Program.Counters.InterruptWaits++;
+							}
+						} break;
+				}
+			}
+		}
 
 		internal void DoInterrupt()
 		{
 			m_interruptPhase = InterruptPhase.RequestId;
+			m_instructionQueue.instructions.Clear();
 			m_startInterrupt = true;
 		}
 	}

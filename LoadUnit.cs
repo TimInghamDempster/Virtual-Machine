@@ -21,6 +21,7 @@ namespace Virutal_Machine
 		int[] m_currentInstruction;
 		bool m_hasInstruction;
 		bool m_waitingForMemory;
+		int m_waitingAddress;
 		int[] m_registers;
 
 		public LoadUnit(CPUCore cPUCore, InterconnectTerminal IOInterconnect, int[] registers)
@@ -50,6 +51,7 @@ namespace Virutal_Machine
 							if (requestSent)
 							{
 								m_waitingForMemory = true;
+								m_waitingAddress = newPacket[1];
 							}
 						}
 						else
@@ -71,6 +73,7 @@ namespace Virutal_Machine
 								if (requestSent)
 								{
 									m_waitingForMemory = true;
+									m_waitingAddress = newPacket[1];
 								}
 							}
 							else
@@ -89,14 +92,17 @@ namespace Virutal_Machine
 				int[] recivedPacket = new int[m_IOInterconnect.RecievedSize];
 				m_IOInterconnect.ReadRecievedPacket(recivedPacket);
 
-				m_IOInterconnect.ClearRecievedPacket();
-				m_waitingForMemory = false;
-				m_hasInstruction = false;
+				if(recivedPacket[0] == (int)MessageType.Response && recivedPacket[1] == m_waitingAddress)
+				{
+					m_IOInterconnect.ClearRecievedPacket();
+					m_waitingForMemory = false;
+					m_hasInstruction = false;
 
-				m_registers[(m_currentInstruction[0] >> 8) & 0x000000ff] = recivedPacket[1];
+					m_registers[(m_currentInstruction[0] >> 8) & 0x000000ff] = recivedPacket[2];
 
-				m_CPUCore.NextStage = PipelineStages.BranchPredict;
-				Program.Counters.InstructionsExecuted++;
+					m_CPUCore.NextStage = PipelineStages.BranchPredict;
+					Program.Counters.InstructionsExecuted++;
+				}
 			}
 			else
 			{

@@ -128,7 +128,7 @@ namespace Virutal_Machine
 				{
 					SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
 				}
-				m_CPUCore.NextStage = PipelineStages.InstructionFetch;
+				m_CPUCore.NextStage = PipelineStages.InstructionDispatch;
 			}
 		}
 

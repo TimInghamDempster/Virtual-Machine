@@ -103,7 +103,7 @@ namespace Virutal_Machine
 
 			if(m_LPICInterconnenct.HasPacket)
 			{
-				int[] packet = new int[m_IOInterconnect.RecievedSize];
+				int[] packet = new int[m_LPICInterconnenct.RecievedSize];
 				m_LPICInterconnenct.ReadRecievedPacket(packet);
 
 				bool forwarded = m_coreInterconencts[0].SendPacket(packet, packet.Length);

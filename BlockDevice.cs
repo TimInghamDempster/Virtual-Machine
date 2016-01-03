@@ -174,10 +174,11 @@ namespace Virutal_Machine
 							m_readCounter = m_readTime;
 						
 							m_sending = true;
-							m_sendData = new int[2];
+							m_sendData = new int[3];
 
 							m_sendData[0] = (int)MessageType.Response;
-							m_sendData[1] = m_currentBlockData[m_fifoPointer];
+							m_sendData[1] = packet[1];
+							m_sendData[2] = m_currentBlockData[m_fifoPointer];
 							m_fifoPointer++;
 						}
 					}

@@ -9,7 +9,6 @@ namespace Virutal_Machine
     enum PipelineStages
     {
         BranchPredict,
-        InstructionFetch,
         InstructionDispatch,
         Execution,
         Retirement
@@ -62,16 +61,17 @@ namespace Virutal_Machine
             m_instructionPointer = Program.biosStartAddress;
 			interruptController.AddCore(Interrupt);
             m_registers = new int[16];
-            m_currentStage = PipelineStages.InstructionFetch;
-            m_nextStage = PipelineStages.InstructionFetch;
+            m_currentStage = PipelineStages.InstructionDispatch;
+			m_nextStage = PipelineStages.InstructionDispatch;
             m_IOInterconnect = IOInterconnect;
             m_retireUnit = new RetireUnit(this);
             m_ALU = new ArithmeticLogicUnit(this, m_registers);
             m_loadUnit = new LoadUnit(this, m_IOInterconnect, m_registers);
             m_storeUnit = new StoreUnit(this, IOInterconnect, m_registers);
             m_branchUnit = new BranchUnit(this, m_registers, (uint ip) => m_instructionPointer = ip );
-            m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_ALU, m_loadUnit, m_storeUnit);
-            m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, m_dispatchUnit, EndInterrupt);
+			m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, EndInterrupt);
+			m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_ALU, m_loadUnit, m_storeUnit, m_fetchUnit, EndInterrupt);
+            
         }
 
 		void Interrupt()
@@ -83,7 +83,7 @@ namespace Virutal_Machine
 		{
 			m_interrupted = false;
 			m_instructionPointer = m_storedInstructionPointer;
-			m_nextStage = PipelineStages.InstructionFetch;
+			m_nextStage = PipelineStages.InstructionDispatch;
 		}
 
         public void Tick()
@@ -97,9 +97,9 @@ namespace Virutal_Machine
             m_storeUnit.Tick();
             m_retireUnit.Tick();
 
-			// Only safe time to do this is right before a fetch
+			// Only safe time to do this is right before dispatch
 			if (m_interruptWaiting &&
-			m_currentStage != PipelineStages.InstructionFetch && m_nextStage == PipelineStages.InstructionFetch
+			m_currentStage != PipelineStages.InstructionDispatch && m_nextStage == PipelineStages.InstructionDispatch
 				&& !m_interrupted)
 			{
 				m_storedInstructionPointer = m_instructionPointer;
