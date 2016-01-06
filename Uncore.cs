@@ -67,7 +67,7 @@ namespace Virutal_Machine
 
 			if(m_RAMInterconnect.HasPacket)
 			{
-				int[] packet = new int[m_IOInterconnect.RecievedSize];
+				int[] packet = new int[m_RAMInterconnect.RecievedSize];
 				m_RAMInterconnect.ReadRecievedPacket(packet);
 
 				// Broadcast to all cores before attempting anything multicore.
