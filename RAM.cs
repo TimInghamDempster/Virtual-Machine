@@ -30,13 +30,13 @@ namespace Virutal_Machine
 
 		public void Tick()
 		{
-			if (m_cpuInterconnect.HasPacket)
+			if (m_cpuInterconnect.HasPacket && !m_sending && !m_storing)
 			{
 				int[] packet = new int[m_cpuInterconnect.RecievedSize];
 				m_cpuInterconnect.ReadRecievedPacket(packet);
 				m_cpuInterconnect.ClearRecievedPacket();
 
-				if (packet[0] == (int)MessageType.Read && !m_sending  && !m_storing)
+				if (packet[0] == (int)MessageType.Read)
 				{
 					uint localAddress = (uint)packet[1] - m_startAddress;
 					int readLength = packet[2];
@@ -56,7 +56,7 @@ namespace Virutal_Machine
 
 					m_sendCountdown = CyclesPerAccess;
 				}
-				else if (packet[0] == (int)MessageType.Write && !m_sending && !m_storing)
+				else if (packet[0] == (int)MessageType.Write)
 				{
 					uint localAddress = (uint)packet[1] - m_startAddress;
 

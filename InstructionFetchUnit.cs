@@ -24,10 +24,12 @@ namespace Virutal_Machine
 	class InstructionBlock
 	{
 		public Queue<Instruction> instructions;
+		public Queue<Instruction> loopCache;
 
 		public InstructionBlock()
 		{
 			instructions = new Queue<Instruction>();
+			loopCache = new Queue<Instruction>();
 		}
 	}
 
@@ -62,16 +64,31 @@ namespace Virutal_Machine
 			if (!m_startInterrupt)
 			{
 				bool foundCurrentInstruction = false;
+
+				foreach(Instruction inst in m_instructionQueue.loopCache)
+				{
+					if(inst.address == m_CPUCore.InstructionPointer)
+					{
+						foundCurrentInstruction = true;
+					}
+				}
+
 				while(m_instructionQueue.instructions.Count > 0 && foundCurrentInstruction == false)
 				{
 					if(m_instructionQueue.instructions.Peek().address != m_CPUCore.InstructionPointer)
 					{
-						m_instructionQueue.instructions.Dequeue();
+						Instruction inst = m_instructionQueue.instructions.Dequeue();
+						m_instructionQueue.loopCache.Enqueue(inst);
 					}
 					else
 					{
 						foundCurrentInstruction = true;
 					}
+				}
+
+				while(m_instructionQueue.loopCache.Count > 32)
+				{
+					m_instructionQueue.loopCache.Dequeue();
 				}
 
 				if (m_waitingForMemory == false)
@@ -81,7 +98,7 @@ namespace Virutal_Machine
 						int[] newPacket = new int[3];
 						newPacket[0] = (int)MessageType.Read;
 						newPacket[1] = (int)m_CPUCore.InstructionPointer;
-						newPacket[2] = 2;
+						newPacket[2] = 8;
 
 						bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
 
@@ -93,12 +110,12 @@ namespace Virutal_Machine
 					}
 					else
 					{
-						if(m_instructionQueue.instructions.Count < 4)
+						if(m_instructionQueue.instructions.Count < 5)
 						{
 							int[] newPacket = new int[3];
 							newPacket[0] = (int)MessageType.Read;
 							newPacket[1] = m_instructionQueue.instructions.Last().address + 2;
-							newPacket[2] = 2;
+							newPacket[2] = 8;
 
 							bool requestSent = m_IOInterconnect.SendPacket(newPacket, newPacket.Count());
 
@@ -119,7 +136,10 @@ namespace Virutal_Machine
 
 						if(receivedPacket[0] == (int)MessageType.Response && receivedPacket[1] == m_pendingAddress)
 						{
-							m_instructionQueue.instructions.Enqueue(new Instruction() { address = m_pendingAddress, part1 = receivedPacket[2], part2 = receivedPacket[3]});
+							m_instructionQueue.instructions.Enqueue(new Instruction() { address = m_pendingAddress + 0, part1 = receivedPacket[2], part2 = receivedPacket[3]});
+							m_instructionQueue.instructions.Enqueue(new Instruction() { address = m_pendingAddress + 2, part1 = receivedPacket[4], part2 = receivedPacket[5] });
+							m_instructionQueue.instructions.Enqueue(new Instruction() { address = m_pendingAddress + 4, part1 = receivedPacket[6], part2 = receivedPacket[7] });
+							m_instructionQueue.instructions.Enqueue(new Instruction() { address = m_pendingAddress + 6, part1 = receivedPacket[8], part2 = receivedPacket[9] });
 							m_waitingForMemory = false;
 							m_IOInterconnect.ClearRecievedPacket();
 						}
@@ -225,6 +245,7 @@ namespace Virutal_Machine
 		{
 			m_interruptPhase = InterruptPhase.RequestId;
 			m_instructionQueue.instructions.Clear();
+			m_instructionQueue.loopCache.Clear();
 			m_startInterrupt = true;
 		}
 	}

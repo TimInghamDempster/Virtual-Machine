@@ -56,6 +56,20 @@ namespace Virutal_Machine
 
 				if(!instructionInQueue)
 				{
+					foreach (Instruction inst in m_fetchUnit.m_instructionQueue.loopCache)
+					{
+						if (inst.address == m_CPUCore.InstructionPointer)
+						{
+							currentInstruction[0] = inst.part1;
+							currentInstruction[1] = inst.part2;
+							instructionInQueue = true;
+							break;
+						}
+					}
+				}
+
+				if(!instructionInQueue)
+				{
 					Program.Counters.FetchWaits++;
 					Program.Counters.ICacheMisses++;
 					return;
@@ -68,6 +82,8 @@ namespace Virutal_Machine
 				if ((currentInstruction[0] & 0xff000000) == (int)UnitCodes.Interrupt
 							&& (currentInstruction[0] & 0x00ff0000) == (int)InterruptInstructions.InterruptReturn)
 				{
+					m_fetchUnit.m_instructionQueue.instructions.Clear();
+					m_fetchUnit.m_instructionQueue.loopCache.Clear();
 					EndInterrupt();
 				}
 
