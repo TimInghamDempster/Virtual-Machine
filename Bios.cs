@@ -16,7 +16,7 @@ namespace Virutal_Machine
 		int[] m_sendData;
 		int m_sendCountdown;
 
-		const int CyclesPerAccess = 200; // assumes 1ms at 2.0GHz
+		const int CyclesPerAccess = 2000; // assumes 1ms at 2.0GHz
 
 		public uint Size
 		{

@@ -30,8 +30,8 @@ namespace Virutal_Machine
         static InterconnectTerminal m_CPU_PCH_Interconnect = new InterconnectTerminal(1, 10);
         static InterconnectTerminal m_PCH_CPU_Interconnect = new InterconnectTerminal(1, 10);
 
-        static InterconnectTerminal m_PCH_BIOS_Interconnect = new InterconnectTerminal(1, 10);
-        static InterconnectTerminal m_BIOS_PCH_Interconnect = new InterconnectTerminal(1, 10);
+        static InterconnectTerminal m_PCH_BIOS_Interconnect = new InterconnectTerminal(32, 10);
+        static InterconnectTerminal m_BIOS_PCH_Interconnect = new InterconnectTerminal(32, 10);
 
         static InterconnectTerminal m_PCH_Display_Interconnect = new InterconnectTerminal(32, 10);
         static InterconnectTerminal m_Display_PCH_Interconnect = new InterconnectTerminal(32, 10);
