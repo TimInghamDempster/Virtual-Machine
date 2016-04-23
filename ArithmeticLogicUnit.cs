@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Virutal_Machine
+namespace Virtual_Machine
 {
-	enum ALUOperations
+	public enum ALUOperations
 	{
 		Nop,
 		SetLiteral		= 1 << 16,

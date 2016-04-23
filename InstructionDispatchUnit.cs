@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Virutal_Machine
+namespace Virtual_Machine
 {
 	class InstructionDispatchUnit
 	{
@@ -82,6 +82,7 @@ namespace Virutal_Machine
 				if ((currentInstruction[0] & 0xff000000) == (int)UnitCodes.Interrupt
 							&& (currentInstruction[0] & 0x00ff0000) == (int)InterruptInstructions.InterruptReturn)
 				{
+					//System.Diagnostics.Debugger.Break();
 					m_fetchUnit.m_instructionQueue.instructions.Clear();
 					m_fetchUnit.m_instructionQueue.loopCache.Clear();
 					EndInterrupt();

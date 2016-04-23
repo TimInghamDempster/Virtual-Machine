@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Virutal_Machine
+namespace Virtual_Machine
 {
-    enum StoreOperations
+    public enum StoreOperations
     {
         StoreToRegisterLocation,
         StoreToLiteralLocation = 1 <<16

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Virutal_Machine
+namespace Virtual_Machine
 {
-	enum BranchOperations
+	public enum BranchOperations
 	{
 		Nop,
 		Jump = 1 << 16,
@@ -117,6 +117,10 @@ namespace Virutal_Machine
 							} break;
 						case BranchOperations.Break:
 							{
+								if(!System.Diagnostics.Debugger.IsAttached)
+								{
+									System.Diagnostics.Debugger.Launch();
+								}
 								System.Diagnostics.Debugger.Break();
 								SetInstructionPointer(m_CPUCore.InstructionPointer + 2);
 								m_hasInstruction = false;

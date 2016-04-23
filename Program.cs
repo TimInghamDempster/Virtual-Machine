@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Virutal_Machine
+namespace Virtual_Machine
 {
-	struct StatsCounters
+	public struct StatsCounters
 	{
 		public int InstructionsExecuted;
 		public int LoadWaits;
@@ -17,7 +17,7 @@ namespace Virutal_Machine
 		public int ICacheMisses;
 	}
 
-    class Program
+    public class Program
     {
         static CPU m_cpu;
         static Bios m_bios;
@@ -69,6 +69,8 @@ namespace Virutal_Machine
 
         static void Main(string[] args)
         {
+			System.Diagnostics.Debugger.Launch();
+
 			m_interconnects.Add(m_CPU_PCH_Interconnect);
 			m_interconnects.Add(m_PCH_CPU_Interconnect);
 			m_interconnects.Add(m_PCH_BIOS_Interconnect);

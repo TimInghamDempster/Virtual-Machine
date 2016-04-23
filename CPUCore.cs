@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Virutal_Machine
+namespace Virtual_Machine
 {
     enum PipelineStages
     {
@@ -14,7 +14,7 @@ namespace Virutal_Machine
         Retirement
     }
 
-    enum UnitCodes
+    public enum UnitCodes
     {
         Nop,
         ALU			= 1 << 24,
@@ -102,6 +102,7 @@ namespace Virutal_Machine
 			m_currentStage != PipelineStages.InstructionDispatch && m_nextStage == PipelineStages.InstructionDispatch
 				&& !m_interrupted)
 			{
+				//System.Diagnostics.Debugger.Break();
 				m_storedInstructionPointer = m_instructionPointer;
 				m_fetchUnit.DoInterrupt();
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Virutal_Machine
+namespace Virtual_Machine
 {
 	class BlockDevice
 	{
@@ -62,6 +62,7 @@ namespace Virutal_Machine
 
 		void ReadBlock(string path)
 		{
+			//System.Diagnostics.Debugger.Break();
 			if (System.IO.File.Exists(path))
 			{
 				m_file = new System.IO.FileStream(path, System.IO.FileMode.Open);
@@ -150,6 +151,7 @@ namespace Virutal_Machine
 
 				if(packet[1] == Program.SSDSeekAddress)
 				{
+					//System.Diagnostics.Debugger.Break();
 					int nextBlock = packet[2];
 					
 					if(nextBlock < m_numberOfBlocks)
@@ -167,6 +169,7 @@ namespace Virutal_Machine
 				}
 				else if(packet[1] == Program.SSDFIFOAddress)
 				{
+					//System.Diagnostics.Debugger.Break();
 					if(packet[0] == (int)MessageType.Read)
 					{
 						if(m_fifoPointer < BlockSize)
@@ -196,6 +199,7 @@ namespace Virutal_Machine
 				}
 				else if(packet[1] == Program.SSDInterruptAcknowledgeAddress)
 				{
+					//System.Diagnostics.Debugger.Break();
 					m_isSkwaking = false;
 				}
 			}
