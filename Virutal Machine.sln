@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Virutal Machine", "Virutal Machine.csproj", "{85568F1B-3D33-4875-8980-97EDC94DE147}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "..\Compiler\Compiler.csproj", "{16E5FC80-E089-4464-9071-BEB672A6D1AA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "..\Compiler\Compiler\Compiler.csproj", "{16E5FC80-E089-4464-9071-BEB672A6D1AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
