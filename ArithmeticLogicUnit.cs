@@ -17,7 +17,8 @@ namespace Virtual_Machine
 		Multiply		= 6 << 16,
 		MultiplyLiteral	= 7 << 16,
 		Divide			= 8 << 16,
-		DivideLiteral	= 9 << 16
+		DivideLiteral	= 9 << 16,
+		Copy			= 10 << 16
 	}
 
 	class ArithmeticLogicUnit
@@ -70,6 +71,9 @@ namespace Virtual_Machine
 						break;
 					case ALUOperations.SetLiteral:
 						m_registers[targetRegister] = m_currentInstruction[1];
+						break;
+					case ALUOperations.Copy:
+						m_registers[targetRegister] = m_registers[sourceRegister];
 						break;
 				}
 				m_hasInstruction = false;

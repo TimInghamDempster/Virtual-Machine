@@ -9,7 +9,7 @@ namespace Virtual_Machine
     public enum StoreOperations
     {
         StoreToRegisterLocation,
-        StoreToLiteralLocation = 1 <<16
+        StoreToLiteralLocation = 1 << 16
     }
 
     class StoreUnit

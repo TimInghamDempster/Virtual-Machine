@@ -22,7 +22,8 @@ namespace Virtual_Machine
         Store		= 3 << 24,
 		Branch		= 4 << 24,
 		Fetch		= 5 << 24,
-		Interrupt	= 6 << 24
+		Interrupt	= 6 << 24,
+		Stack		= 7 << 24
     }
 
     class CPUCore
@@ -31,6 +32,8 @@ namespace Virtual_Machine
 		uint m_storedInstructionPointer;
         
         int[] m_registers;
+
+		
 
 		uint m_coreId;
 
@@ -48,11 +51,12 @@ namespace Virtual_Machine
         LoadUnit m_loadUnit;
         StoreUnit m_storeUnit;
         RetireUnit m_retireUnit;
+		StackEngine m_stackEngine;
 
 		public PipelineStages CurrentStage { get { return m_currentStage; } }
 		public PipelineStages NextStage { set { m_nextStage = value; } }
 		public uint InstructionPointer { get { return m_instructionPointer; } }
-
+		public uint StackPointer {get;set;}
 
 
         public CPUCore(InterconnectTerminal IOInterconnect, uint id, InterruptController interruptController)
@@ -68,9 +72,11 @@ namespace Virtual_Machine
             m_ALU = new ArithmeticLogicUnit(this, m_registers);
             m_loadUnit = new LoadUnit(this, m_IOInterconnect, m_registers);
             m_storeUnit = new StoreUnit(this, IOInterconnect, m_registers);
+			m_stackEngine = new StackEngine(this, m_storeUnit, m_loadUnit, m_registers);
             m_branchUnit = new BranchUnit(this, m_registers, (uint ip) => m_instructionPointer = ip );
 			m_fetchUnit = new InstructionFetchUnit(this, IOInterconnect, EndInterrupt);
-			m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_ALU, m_loadUnit, m_storeUnit, m_fetchUnit, EndInterrupt);
+			m_dispatchUnit = new InstructionDispatchUnit(this, m_branchUnit, m_ALU, m_loadUnit, m_storeUnit, m_stackEngine, m_fetchUnit, EndInterrupt);
+			StackPointer = Program.RAMSize - 1;
             
         }
 
@@ -96,6 +102,7 @@ namespace Virtual_Machine
             m_loadUnit.Tick();
             m_storeUnit.Tick();
             m_retireUnit.Tick();
+			m_stackEngine.Tick();
 
 			// Only safe time to do this is right before dispatch
 			if (m_interruptWaiting &&

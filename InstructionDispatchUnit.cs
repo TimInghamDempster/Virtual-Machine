@@ -14,6 +14,7 @@ namespace Virtual_Machine
 		ArithmeticLogicUnit m_ALU;
 		LoadUnit m_loadUnit;
 		StoreUnit m_storeUnit;
+		StackEngine m_stackUnit;
 
 		InstructionFetchUnit m_fetchUnit;
 
@@ -24,6 +25,7 @@ namespace Virtual_Machine
 			ArithmeticLogicUnit ALU,
 			LoadUnit loadUnit,
 			StoreUnit storeUnit,
+			StackEngine stackUnit,
 			InstructionFetchUnit fetchUnit, 
 			Action endInterrupt)
 		{
@@ -32,6 +34,7 @@ namespace Virtual_Machine
 			m_ALU = ALU;
 			m_loadUnit = loadUnit;
 			m_storeUnit = storeUnit;
+			m_stackUnit = stackUnit;
 			m_fetchUnit = fetchUnit;
 			EndInterrupt = endInterrupt;
 		}
@@ -111,6 +114,11 @@ namespace Virtual_Machine
 							m_branchUnit.SetInstruction(currentInstruction);
 							m_CPUCore.NextStage = PipelineStages.BranchPredict;
 						} break;
+					case UnitCodes.Stack:
+						{
+							m_stackUnit.SetInstruction(currentInstruction);
+							m_CPUCore.NextStage = PipelineStages.Execution;
+						}break;
 					case UnitCodes.Nop:
 						{
 							// Do we want to fetch here or move the isntruction pointer?

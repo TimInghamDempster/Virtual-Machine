@@ -53,6 +53,7 @@
     <Compile Include="MemeoryController.cs" />
     <Compile Include="PlatformControlHub.cs" />
     <Compile Include="RAM.cs" />
+    <Compile Include="StackEngine.cs" />
     <Compile Include="StoreUnit.cs" />
     <Compile Include="CPU.cs" />
     <Compile Include="CPUCore.cs" />
